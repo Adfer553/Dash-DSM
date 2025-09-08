@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSM Torre de Controle - Dashboard de Vendas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --dsm-blue: #1f4788;
+            --dsm-green: #4caf50;
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a202c;
+            --bg-card: #2d3748;
+            --bg-card-hover: #374151;
+            --border-color: #4a5568;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e0;
+            --text-muted: #a0aec0;
+            --accent-blue: #3b82f6;
+            --accent-teal: #14b8a6;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --gradient-dsm: linear-gradient(135deg, var(--dsm-blue) 0%, var(--dsm-green) 100%);
+            --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-primary); color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6; font-size: 14px; overflow-x: auto;
+        }
+
+        .dashboard {
+            padding: 24px; max-width: 1920px; margin: 0 auto; display: grid;
+            grid-template-columns: 320px 1fr 1fr 1fr;
+            grid-template-rows: auto auto 1fr;
+            gap: 24px; min-height: 100vh;
+            grid-template-areas:
+                "header header header header"
+                "sidebar kpi1 kpi2 kpi3"
+                "sidebar chart1 chart1 chart2";
+        }
+        
+        /* HEADER PREMIUM */
+        .header {
+            grid-area: header; background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border-radius: 16px; padding: 32px; border: 2px solid var(--border-color);
+            position: relative; overflow: hidden; box-shadow: var(--shadow-lg);
+        }
+        .header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 6px; background: var(--gradient-dsm);
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+        .header-left { display: flex; align-items: center; gap: 24px; }
+        .dsm-logo img { width: 80px; height: 80px; border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 71, 136, 0.3); }
+        .header-info h1 {
+            font-size: 32px; font-weight: 800; margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-info p { color: var(--text-secondary); font-size: 16px; font-weight: 500; }
+        .header-stats { display: flex; gap: 32px; align-items: center; }
+        .period-badge {
+            background: var(--gradient-dsm); padding: 12px 24px; border-radius: 12px;
+            font-weight: 600; font-size: 14px; color: white; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .filters { display: flex; gap: 12px; background: var(--bg-secondary); padding: 8px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .filter-btn {
+            padding: 12px 20px; background: transparent; border: none; color: var(--text-secondary);
+            border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .filter-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); transform: translateY(-1px); }
+        .filter-btn.active { background: var(--gradient-dsm); color: white; box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3); }
+
+        /* CARDS PREMIUM */
+        .card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border-radius: 16px; border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .card:hover { transform: translateY(-8px); border-color: var(--dsm-blue); box-shadow: 0 20px 40px rgba(31, 71, 136, 0.2); }
+        .card-header {
+            padding: 24px 24px 20px; border-bottom: 1px solid var(--border-color); display: flex;
+            justify-content: space-between; align-items: center; position: relative; z-index: 2;
+        }
+        .card-title {
+            font-size: 13px; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .card-icon {
+            width: 40px; height: 40px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 18px;
+            color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* KPI CARDS */
+        .kpi-card { grid-area: kpi1; }
+        #kpi-card-2 { grid-area: kpi2; }
+        #kpi-card-3 { grid-area: kpi3; }
+        .kpi-content { padding: 32px 24px; text-align: center; position: relative; z-index: 2; }
+        .kpi-value {
+            font-size: 36px; font-weight: 900; margin-bottom: 12px;
+            background: var(--gradient-teal); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-family: 'Inter', monospace; letter-spacing: -1px;
+        }
+        .kpi-value.orange { background: var(--gradient-orange); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kpi-value.blue { background: var(--gradient-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kpi-subtitle { font-size: 13px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* SIDEBAR */
+        .sidebar-card { grid-area: sidebar; padding: 0; }
+        .vendor-list { padding: 24px; }
+        .vendor-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-color); transition: all 0.3s ease; }
+        .vendor-item:hover { background: var(--bg-card-hover); transform: translateX(4px); }
+        .vendor-info { display: flex; align-items: center; }
+        .vendor-name { font-weight: 600; font-size: 14px; }
+        .vendor-value { font-weight: 700; font-size: 15px; color: var(--accent-teal); }
+        .vendor-rank {
+            width: 28px; height: 28px; background: var(--gradient-dsm); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+            color: white; margin-right: 12px; flex-shrink: 0;
+        }
+        .performance-ratio { margin: 0 24px 24px 24px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color); }
+        .ratio-item { display: flex; justify-content: space-between; }
+        .ratio-item span:first-child { font-size: 13px; color: var(--text-secondary); }
+        .ratio-item span:last-child { font-size: 13px; font-weight: 600; }
+
+        /* LARGE CARDS */
+        .large-card { padding: 0; }
+        #chart-card-1 { grid-area: chart1; }
+        #chart-card-2 { grid-area: chart2; }
+        .chart-container { padding: 24px; height: 400px; position: relative; z-index: 2; }
+        
+        /* UPLOAD AREA */
+        .upload-area { grid-column: 1 / -1; padding: 48px; border: 3px dashed var(--border-color); border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.4s ease; background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%); }
+        .upload-area.hidden { display: none; }
+        .upload-area:hover { border-color: var(--dsm-blue); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(31, 71, 136, 0.15); }
+        .upload-area.active { border-color: var(--dsm-green); box-shadow: 0 0 32px rgba(76, 175, 80, 0.2); }
+        .upload-icon { font-size: 56px; margin-bottom: 24px; color: var(--dsm-blue); display: block; }
+        .upload-text { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .upload-subtext { font-size: 14px; color: var(--text-muted); }
+        .upload-highlight { color: var(--dsm-blue); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="dsm-logo">
+                        <img src="data:image/png;base64,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" alt="Logo DSM">
+                    </div>
+                    <div class="header-info">
+                        <h1>Torre de Controle - Vendas</h1>
+                        <p>Odontologia do Futuro | Dental Medicine Solutions</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div id="period-badge" class="period-badge">Carregue um arquivo</div>
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">Tudo</button>
+                        <button class="filter-btn" data-filter="30">30d</button>
+                        <button class="filter-btn" data-filter="7">7d</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📊</div>
+            <div class="upload-text">Carregar Relatório de Vendas</div>
+            <div class="upload-subtext">Arraste seu arquivo CSV aqui ou <span class="upload-highlight">clique para selecionar</span></div>
+            <input type="file" id="csv-file" accept=".csv" style="display:none;">
+        </div>
+        
+        <div class="card kpi-card" id="kpi-card-1" style="display: none;">
+             <div class="card-header"><span class="card-title">Vendas Totais</span><div class="card-icon" style="background: var(--gradient-teal);">💰</div></div>
+             <div class="kpi-content">
+                 <div class="kpi-value" id="kpi-total">R$ 0,00</div>
+                 <div class="kpi-subtitle">Período Selecionado</div>
+             </div>
+        </div>
+        <div class="card kpi-card" id="kpi-card-2" style="display: none;">
+             <div class="card-header"><span class="card-title">Ticket Médio</span><div class="card-icon" style="background: var(--gradient-orange);">🎫</div></div>
+             <div class="kpi-content">
+                 <div class="kpi-value orange" id="kpi-ticket">R$ 0,00</div>
+                 <div class="kpi-subtitle">Por Transação</div>
+             </div>
+        </div>
+        <div class="card kpi-card" id="kpi-card-3" style="display: none;">
+            <div class="card-header"><span class="card-title">Total Vendas</span><div class="card-icon" style="background: var(--gradient-blue);">📈</div></div>
+             <div class="kpi-content">
+                 <div class="kpi-value blue" id="kpi-count">0</div>
+                 <div class="kpi-subtitle">Transações</div>
+             </div>
+        </div>
+        <div class="card sidebar-card" id="sidebar-card" style="display: none;">
+            <div class="card-header"><span class="card-title">Top Vendedores</span><div class="card-icon" style="background: var(--gradient-dsm);">👑</div></div>
+            <div class="vendor-list" id="vendor-list"></div>
+            <div class="performance-ratio" id="performance-ratio"></div>
+        </div>
+        <div class="card large-card" id="chart-card-1" style="display: none;">
+            <div class="card-header"><span class="card-title" id="chart-evolucao-title">Evolução de Vendas</span><div class="card-icon" style="background: var(--gradient-blue);">📈</div></div>
+            <div class="chart-container" id="chart-evolucao"></div>
+        </div>
+        <div class="card large-card" id="chart-card-2" style="display: none;">
+            <div class="card-header"><span class="card-title">Top 10 Clientes</span><div class="card-icon" style="background: var(--gradient-teal);">👥</div></div>
+            <div class="chart-container" id="chart-clientes"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script>
+        let originalData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupHighchartsTheme();
+            setupUploadArea();
+            setupFilters();
+        });
+
+        function setupUploadArea() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('csv-file');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => uploadArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false));
+            ['dragenter', 'dragover'].forEach(eventName => uploadArea.addEventListener(eventName, () => uploadArea.classList.add('active'), false));
+            ['dragleave', 'drop'].forEach(eventName => uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('active'), false));
+            uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                Papa.parse(files[0], {
+                    header: true,
+                    skipEmptyLines: true,
+                    delimiter: ";",
+                    complete: results => processData(results.data),
+                    error: error => alert(`Erro ao processar CSV: ${error.message}`)
+                });
+            }
+        }
+
+        function processData(data) {
+            try {
+                originalData = data.map(row => {
+                    const valorStr = String(row.Valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.');
+                    const valor = parseFloat(valorStr);
+                    if (isNaN(valor) || !row.Data || !row.Vendedor || !row.Cliente) {
+                       console.warn(`Linha ignorada por dados inválidos: ${JSON.stringify(row)}`);
+                       return null;
+                    }
+                    const [day, month, year] = row.Data.split('/');
+                    return {
+                        Vendedor: row.Vendedor.trim(),
+                        Cliente: row.Cliente.trim(),
+                        ID_Venda: row['Venda'], // Nome da coluna no CSV
+                        Data: new Date(`${year}-${month}-${day}T00:00:00`),
+                        Valor: valor
+                    };
+                }).filter(row => row !== null); // Remove as linhas que foram ignoradas
+                
+                document.getElementById('upload-area').classList.add('hidden');
+                document.querySelectorAll('.kpi-card, .sidebar-card, .large-card').forEach(el => el.style.display = 'block');
+                
+                // Ativa o filtro "Tudo" por padrão ao carregar novos dados
+                document.querySelector('.filter-btn.active').classList.remove('active');
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                applyFilter('all');
+            } catch (error) {
+                alert(`Erro ao processar os dados. Verifique o formato do seu CSV.\nDetalhe: ${error.message}`);
+                // Mostra a área de upload novamente em caso de erro
+                document.getElementById('upload-area').classList.remove('hidden');
+            }
+        }
+
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (originalData.length === 0) {
+                        alert("Por favor, carregue um arquivo CSV primeiro.");
+                        return;
+                    }
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter(this.dataset.filter);
+                });
+            });
+        }
+
+        function applyFilter(days) {
+            let filteredData = [];
+            if (days === 'all') {
+                filteredData = originalData;
+            } else {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+                cutoffDate.setHours(0, 0, 0, 0);
+                filteredData = originalData.filter(row => row.Data >= cutoffDate);
+            }
+            updateDashboard(filteredData);
+        }
+
+        function updateDashboard(data) {
+            const periodBadge = document.getElementById('period-badge');
+            if (data.length > 0) {
+                const firstDate = new Date(Math.min.apply(null, data.map(r => r.Data)));
+                const lastDate = new Date(Math.max.apply(null, data.map(r => r.Data)));
+                periodBadge.textContent = `${firstDate.toLocaleDateString('pt-BR')} - ${lastDate.toLocaleDateString('pt-BR')}`;
+            } else {
+                periodBadge.textContent = "Sem Dados";
+            }
+
+            updateKPIs(data);
+            updateSidebar(data);
+            renderEvolucaoChart(data);
+            renderClientesChart(data);
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function updateKPIs(data) {
+            const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
+            const numVendas = data.length;
+            const ticketMedio = numVendas > 0 ? totalVendas / numVendas : 0;
+
+            document.getElementById('kpi-total').textContent = formatCurrency(totalVendas);
+            document.getElementById('kpi-count').textContent = numVendas;
+            document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
+        }
+
+        function updateSidebar(data) {
+            const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
+            const salesByVendedor = data.reduce((acc, row) => {
+                acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
+                return acc;
+            }, {});
+            const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b-a);
+            
+            const vendorList = document.getElementById('vendor-list');
+            const ratioContainer = document.getElementById('performance-ratio');
+            vendorList.innerHTML = '';
+            ratioContainer.innerHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio</h4>`;
+
+            sortedVendedores.forEach(([name, value], index) => {
+                vendorList.innerHTML += `
+                    <div class="vendor-item">
+                        <div class="vendor-info">
+                            <div class="vendor-rank">${index + 1}</div>
+                            <div class="vendor-name">${name}</div>
+                        </div>
+                        <div class="vendor-value">${formatCurrency(value)}</div>
+                    </div>`;
+                const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
+                ratioContainer.innerHTML += `
+                    <div class="ratio-item" style="margin-bottom: 8px;">
+                        <span>${name.split(' ')[0]}</span>
+                        <span style="font-weight: 600; color: ${index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)'};">${percentage.toFixed(1)}%</span>
+                    </div>`;
+            });
+        }
+        
+        function renderEvolucaoChart(data) {
+            const salesByDate = data.reduce((acc, row) => {
+                const dateString = row.Data.toISOString().split('T')[0];
+                acc[dateString] = (acc[dateString] || 0) + row.Valor;
+                return acc;
+            }, {});
+            const sortedDates = Object.entries(salesByDate).sort((a,b) => new Date(a[0]) - new Date(b[0]));
+
+            Highcharts.chart('chart-evolucao', {
+                chart: { type: 'areaspline' },
+                title: { text: null },
+                xAxis: { categories: sortedDates.map(d => new Date(d[0]).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})) },
+                yAxis: { title: { text: null } },
+                legend: { enabled: false },
+                plotOptions: {
+                    areaspline: {
+                        fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [ [0, 'rgba(20, 184, 166, 0.8)'], [1, 'rgba(20, 184, 166, 0.1)'] ] },
+                        lineColor: '#14b8a6', lineWidth: 3,
+                        marker: { fillColor: '#14b8a6', lineColor: '#ffffff', lineWidth: 2, radius: 5 }
+                    }
+                },
+                series: [{ name: 'Vendas', data: sortedDates.map(d => d[1]) }],
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Vendas: ${formatCurrency(this.y)}`; } }
+            });
+        }
+
+        function renderClientesChart(data) {
+            const salesByCliente = data.reduce((acc, row) => {
+                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor;
+                return acc;
+            }, {});
+            const sortedClientes = Object.entries(salesByCliente).sort(([,a],[,b]) => b-a).slice(0, 10);
+
+            Highcharts.chart('chart-clientes', {
+                chart: { type: 'bar' },
+                title: { text: null },
+                xAxis: { categories: sortedClientes.map(c => c[0]) },
+                yAxis: { title: { enabled: false } },
+                legend: { enabled: false },
+                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }],
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Total: ${formatCurrency(this.y)}`; } }
+            });
+        }
+        
+        function setupHighchartsTheme() {
+            Highcharts.setOptions({
+                chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } },
+                title: { style: { color: 'var(--text-primary)' } },
+                xAxis: { labels: { style: { color: 'var(--text-secondary)' } }, lineColor: 'var(--border-color)', tickColor: 'var(--border-color)' },
+                yAxis: { title: { style: { color: 'var(--text-secondary)' } }, labels: { style: { color: 'var(--text-secondary)' } }, gridLineColor: 'var(--border-color)' },
+                legend: { itemStyle: { color: 'var(--text-primary)' } },
+                tooltip: { backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', style: { color: 'var(--text-primary)' } },
+                credits: { enabled: false }
+            });
+        }
+    </script>
+</body>
+</html>
