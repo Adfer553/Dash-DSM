@@ -58,7 +58,7 @@
         .ratio-item span:last-child { font-size: 13px; font-weight: 600; }
         .large-card { padding: 0; } #chart-card-1 { grid-area: chart1; } #chart-card-2 { grid-area: chart2; }
         .chart-container { padding: 24px; height: 400px; position: relative; z-index: 2; }
-        .admin-container { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 24px;}
+        .admin-container { grid-column: 1 / -1; display: none; grid-template-columns: 1fr 1fr; gap: 24px;}
         .upload-area, .login-area, .config-area { padding: 48px; border: 3px dashed var(--border-color); border-radius: 16px; text-align: center; transition: all 0.4s ease; background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%); }
         .login-area { grid-column: 1 / -1; }
         .upload-area.hidden, .login-area.hidden, .config-area.hidden { display: none; }
@@ -96,7 +96,7 @@
                         <img id="dashboard-logo" src="" alt="Logo DSM">
                     </div>
                     <div class="header-info">
-                        <h1 id="dashboard-title"></h1>
+                        <h1 id="dashboard-title">Carregando...</h1>
                     </div>
                 </div>
                 <div class="header-stats">
@@ -128,7 +128,7 @@
             <div class="status-message" id="login-status-message"></div>
         </div>
 
-        <div class="admin-container">
+        <div class="admin-container" id="admin-container">
             <div class="config-area hidden" id="config-area">
                 <div class="config-text">Configurações do Dashboard</div>
                 <form class="config-form" id="config-form">
@@ -158,12 +158,12 @@
             </div>
         </div>
         
-        <div class="card kpi-card" id="kpi-card-1" style="display: none;"></div>
-        <div class="card kpi-card" id="kpi-card-2" style="display: none;"></div>
-        <div class="card kpi-card" id="kpi-card-3" style="display: none;"></div>
-        <div class="card sidebar-card" id="sidebar-card" style="display: none;"></div>
-        <div class="card large-card" id="chart-card-1" style="display: none;"></div>
-        <div class="card large-card" id="chart-card-2" style="display: none;"></div>
+        <div class="card kpi-card" id="kpi-card-1" style="display: none;"><div class="card-header"><span class="card-title">Vendas Totais</span><div class="card-icon" style="background: var(--gradient-teal);">💰</div></div><div class="kpi-content"><div class="kpi-value" id="kpi-total">R$ 0,00</div><div class="kpi-subtitle">Período Selecionado</div></div></div>
+        <div class="card kpi-card" id="kpi-card-2" style="display: none;"><div class="card-header"><span class="card-title">Ticket Médio</span><div class="card-icon" style="background: var(--gradient-orange);">🎫</div></div><div class="kpi-content"><div class="kpi-value orange" id="kpi-ticket">R$ 0,00</div><div class="kpi-subtitle">Por Transação</div></div></div>
+        <div class="card kpi-card" id="kpi-card-3" style="display: none;"><div class="card-header"><span class="card-title">Total Vendas</span><div class="card-icon" style="background: var(--gradient-blue);">📈</div></div><div class="kpi-content"><div class="kpi-value blue" id="kpi-count">0</div><div class="kpi-subtitle">Transações</div></div></div>
+        <div class="card sidebar-card" id="sidebar-card" style="display: none;"><div class="card-header"><span class="card-title">Top Vendedores</span><div class="card-icon" style="background: var(--gradient-dsm);">👑</div></div><div class="vendor-list" id="vendor-list"></div><div class="performance-ratio" id="performance-ratio"></div></div>
+        <div class="card large-card" id="chart-card-1" style="display: none;"><div class="card-header"><span class="card-title" id="chart-evolucao-title">Evolução de Vendas</span><div class="card-icon" style="background: var(--gradient-blue);">📈</div></div><div class="chart-container" id="chart-evolucao"></div></div>
+        <div class="card large-card" id="chart-card-2" style="display: none;"><div class="card-header"><span class="card-title">Top 10 Clientes</span><div class="card-icon" style="background: var(--gradient-teal);">👥</div></div><div class="chart-container" id="chart-clientes"></div></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -189,8 +189,8 @@
         let originalData = null;
         let processedDataForPublish = null;
         let customDateFilter = null;
-        const DEFAULT_TITLE = "Dashboard Comercial";
-        const DEFAULT_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACACAYAAAC6yG3+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAErYSURBVHhe7Z0HgB1FlccrD0NKQiAhEIIg5CJIQBEFFkU2xY6sIAgiIEgREVGQyI4giL4ioiDIvggiiL5LIIsBIiQIeSdNQkICEjLJ7n/X9L1uN7N7s2+2u3v36f18l6pnd2Z6eqp6p6p7qt4kGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhG-Ei0K8eK+7wKkGAAAAAAAAAAAAwA=";
+        const DEFAULT_TITLE = "DSM - Dash Comercial";
+        const DEFAULT_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACACAYAAAC6yG3+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAErYSURBVHhe7Z0HgB1FlccrD0NKQiAhEIIg5CJIQBEFFkU2xY6sIAgiIEgREVGQyI4giL4ioiDIvggiiL5LIIsBIiQIeSdNQkICEjLJ7n/X9L1uN7N7s2+2u3v36f18l6pnd2Z6eqp6p6p7qt4kGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZh-Ei0K8eK+7wKkGAAAAAAAAAAAAwA=";
 
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -198,33 +198,39 @@
             setupHighchartsTheme();
             if (isAdmin) {
                 auth.onAuthStateChanged(user => {
-                    if (user) { initializeAdminView(); } else { initializeLoginView(); }
+                    if (user) {
+                        initializeAdminView();
+                    } else {
+                        initializeLoginView();
+                    }
                 });
             } else {
                 fetchAndDisplayPublicDashboard();
             }
         });
 
-        function initializeLoginView() { /* ...código original... */ }
+        function initializeLoginView() {
+            document.getElementById('login-area').classList.remove('hidden');
+            document.querySelector('.admin-container').style.display = 'none';
+            document.querySelector('.header').style.display = 'none'; // Esconde o header na tela de login
+        }
 
         function initializeAdminView() {
             document.getElementById('login-area').classList.add('hidden');
             document.querySelector('.admin-container').style.display = 'grid';
             document.getElementById('config-area').classList.remove('hidden');
             document.getElementById('upload-area').classList.remove('hidden');
-            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.header').style.display = 'block'; // Mostra o header no admin
             document.getElementById('period-badge').textContent = "Modo Administrador";
             
             // Preenche as configurações atuais
             db.collection('dashboard').doc('config').get().then(doc => {
-                if (doc.exists) {
-                    const config = doc.data();
-                    document.getElementById('config-title-input').value = config.title || '';
-                    document.getElementById('logo-preview').src = config.logoUrl || DEFAULT_LOGO;
-                } else {
-                    document.getElementById('config-title-input').value = DEFAULT_TITLE;
-                    document.getElementById('logo-preview').src = DEFAULT_LOGO;
-                }
+                const config = doc.exists ? doc.data() : {};
+                document.getElementById('config-title-input').value = config.title || DEFAULT_TITLE;
+                document.getElementById('logo-preview').src = config.logoUrl || DEFAULT_LOGO;
+                // Atualiza o header da própria página de admin
+                document.getElementById('dashboard-title').textContent = config.title || DEFAULT_TITLE;
+                document.getElementById('dashboard-logo').src = config.logoUrl || DEFAULT_LOGO;
             });
 
             setupUploadArea();
@@ -235,17 +241,13 @@
             const headerTitle = document.getElementById('dashboard-title');
             const headerLogo = document.getElementById('dashboard-logo');
             const periodBadge = document.getElementById('period-badge');
-
             try {
                 periodBadge.textContent = "Carregando...";
-                
-                // Busca os dados de config e de vendas em paralelo
                 const [configDoc, salesDoc] = await Promise.all([
                     db.collection('dashboard').doc('config').get(),
                     db.collection('dashboard').doc('dados').get()
                 ]);
 
-                // Aplica as configurações
                 if (configDoc.exists) {
                     const config = configDoc.data();
                     headerTitle.textContent = config.title || DEFAULT_TITLE;
@@ -255,7 +257,6 @@
                     headerLogo.src = DEFAULT_LOGO;
                 }
 
-                // Processa os dados de vendas
                 if (salesDoc.exists) {
                     const data = salesDoc.data();
                     originalData = data.allRows.map(r => ({ ...r, Data: new Date(r.Data) }));
@@ -275,26 +276,23 @@
             }
         }
         
-        // --- NOVAS FUNÇÕES DE CONFIGURAÇÃO ---
         function setupConfigControls() {
             document.getElementById('save-title-btn').addEventListener('click', saveTitle);
             document.getElementById('logo-file').addEventListener('change', handleLogoUpload);
+            document.getElementById('login-form').addEventListener('submit', handleAdminLogin);
         }
 
         async function saveTitle() {
             const newTitle = document.getElementById('config-title-input').value;
             const statusMsg = document.getElementById('config-status-message');
-            if (!newTitle) {
-                alert('O título não pode estar vazio.');
-                return;
-            }
+            if (!newTitle) { alert('O título não pode estar vazio.'); return; }
             statusMsg.textContent = 'Salvando título...';
             statusMsg.className = 'status-message';
             try {
                 await db.collection('dashboard').doc('config').set({ title: newTitle }, { merge: true });
                 statusMsg.textContent = 'Título salvo com sucesso!';
                 statusMsg.className = 'status-message success';
-                document.getElementById('dashboard-title').textContent = newTitle; // Atualiza o header da pág admin
+                document.getElementById('dashboard-title').textContent = newTitle;
             } catch (error) {
                 statusMsg.textContent = 'Erro ao salvar título.';
                 statusMsg.className = 'status-message error';
@@ -306,32 +304,41 @@
             const file = event.target.files[0];
             const statusMsg = document.getElementById('config-status-message');
             if (!file) return;
-
             statusMsg.textContent = 'Carregando logo...';
             statusMsg.className = 'status-message';
-
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const logoBase64 = e.target.result;
-                document.getElementById('logo-preview').src = logoBase64; // Mostra preview
+                document.getElementById('logo-preview').src = logoBase64;
                 try {
                     await db.collection('dashboard').doc('config').set({ logoUrl: logoBase64 }, { merge: true });
                     statusMsg.textContent = 'Logo salva com sucesso!';
                     statusMsg.className = 'status-message success';
-                    document.getElementById('dashboard-logo').src = logoBase64; // Atualiza o header da pág admin
+                    document.getElementById('dashboard-logo').src = logoBase64;
                 } catch (error) {
                     statusMsg.textContent = 'Erro ao salvar a logo.';
                     statusMsg.className = 'status-message error';
                     console.error("Erro ao salvar logo:", error);
                 }
             };
-            reader.readAsDataURL(file); // Converte imagem para Base64
+            reader.readAsDataURL(file);
         }
 
-
-        // --- FUNÇÕES ANTIGAS (sem alterações, exceto handleFiles e processDataForPublishing para remover diagnóstico) ---
-
-        async function handleAdminLogin(event) { /* ...código original sem alterações... */ }
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const statusMessage = document.getElementById('login-status-message');
+            statusMessage.textContent = 'Autenticando...';
+            statusMessage.className = 'status-message';
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                statusMessage.textContent = '';
+            } catch (error) {
+                statusMessage.textContent = `Erro: ${error.message}`;
+                statusMessage.className = 'status-message error';
+            }
+        }
 
         function setupUploadArea() {
             const uploadArea = document.getElementById('upload-area');
@@ -386,18 +393,199 @@
             }
         }
 
-        async function publishDataToFirebase() { /* ...código original sem alterações... */ }
-        function setupFilters() { /* ...código original... */ }
-        function setupDateFilter() { /* ...código original... */ }
-        function applyFilter(days) { /* ...código original... */ }
-        function applyCustomDateFilter() { /* ...código original... */ }
-        function updateDashboardUI(data) { /* ...código original... */ }
+        async function publishDataToFirebase() {
+            if (!processedDataForPublish) return;
+            const publishBtn = document.getElementById('publish-btn');
+            const statusMessage = document.getElementById('status-message');
+            publishBtn.disabled = true;
+            publishBtn.textContent = 'Publicando...';
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = 'Enviando dados...';
+            try {
+                await db.collection('dashboard').doc('dados').set(processedDataForPublish);
+                statusMessage.textContent = 'Sucesso! Dados publicados.';
+                statusMessage.className = 'status-message success';
+                publishBtn.textContent = 'Publicar Novos Dados';
+            } catch (error) {
+                console.error("Erro ao publicar: ", error);
+                statusMessage.textContent = `Erro ao publicar: ${error.message}`;
+                statusMessage.className = 'status-message error';
+                publishBtn.textContent = 'Tentar Publicar Novamente';
+            } finally {
+                publishBtn.disabled = false;
+            }
+        }
+
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!originalData) return;
+                    customDateFilter = null;
+                    document.getElementById('start-date').value = '';
+                    document.getElementById('end-date').value = '';
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter(this.dataset.filter);
+                });
+            });
+        }
+
+        function setupDateFilter() {
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            const applyBtn = document.getElementById('apply-date-btn');
+            const clearBtn = document.getElementById('clear-date-btn');
+            applyBtn.addEventListener('click', function() {
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                if (!startDate || !endDate) { alert('Por favor, selecione ambas as datas.'); return; }
+                if (new Date(startDate) > new Date(endDate)) { alert('A data inicial deve ser anterior ou igual à data final.'); return; }
+                customDateFilter = { start: new Date(startDate + 'T00:00:00Z'), end: new Date(endDate + 'T23:59:59Z') };
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                applyCustomDateFilter();
+            });
+            clearBtn.addEventListener('click', function() {
+                startDateInput.value = '';
+                endDateInput.value = '';
+                customDateFilter = null;
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                applyFilter('all');
+            });
+        }
+
+        function applyFilter(days) {
+            let filteredData;
+            if (days === 'all') {
+                filteredData = originalData;
+            } else {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (days === '1') {
+                    filteredData = originalData.filter(row => {
+                        const rowDate = new Date(row.Data);
+                        rowDate.setHours(0, 0, 0, 0);
+                        return rowDate.getTime() === today.getTime();
+                    });
+                } else {
+                    const cutoffDate = new Date(today);
+                    cutoffDate.setDate(today.getDate() - parseInt(days) + 1);
+                    filteredData = originalData.filter(row => row.Data >= cutoffDate);
+                }
+            }
+            updateDashboardUI(filteredData);
+        }
+
+        function applyCustomDateFilter() {
+            if (!customDateFilter || !originalData) return;
+            const filteredData = originalData.filter(row => {
+                const rowDate = new Date(row.Data);
+                return rowDate >= customDateFilter.start && rowDate <= customDateFilter.end;
+            });
+            updateDashboardUI(filteredData);
+        }
+
+        function updateDashboardUI(data) {
+            const periodBadge = document.getElementById('period-badge');
+            if (data && data.length > 0) {
+                const dates = data.map(r => r.Data);
+                const firstDate = new Date(Math.min.apply(null, dates));
+                const lastDate = new Date(Math.max.apply(null, dates));
+                periodBadge.textContent = `${firstDate.toLocaleDateString('pt-BR')} - ${lastDate.toLocaleDateString('pt-BR')}`;
+            } else {
+                periodBadge.textContent = "Sem Dados no Período";
+            }
+            updateKPIs(data);
+            updateSidebar(data);
+            renderEvolucaoChart(data);
+            renderClientesChart(data);
+        }
+
         function formatCurrency(value) { return (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-        function updateKPIs(data) { /* ...código original... */ }
-        function updateSidebar(data) { /* ...código original... */ }
-        function renderEvolucaoChart(data) { /* ...código original... */ }
-        function renderClientesChart(data) { /* ...código original... */ }
-        function setupHighchartsTheme() { /* ...código original... */ }
+        
+        function updateKPIs(data) {
+            const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
+            const numVendas = data.length;
+            const ticketMedio = numVendas > 0 ? totalVendas / numVendas : 0;
+            document.getElementById('kpi-total').textContent = formatCurrency(totalVendas);
+            document.getElementById('kpi-count').textContent = numVendas.toLocaleString('pt-BR');
+            document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
+        }
+
+        function updateSidebar(data) {
+            const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
+            const salesByVendedor = data.reduce((acc, row) => {
+                acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
+                return acc;
+            }, {});
+            const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b - a).slice(0, 5);
+            const vendorList = document.getElementById('vendor-list');
+            const ratioContainer = document.getElementById('performance-ratio');
+            if (sortedVendedores.length === 0) {
+                vendorList.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nenhum vendedor no período.</p>`;
+                ratioContainer.innerHTML = '';
+            } else {
+                const vendorListHTML = sortedVendedores.map(([name, value], index) => `
+                    <div class="vendor-item">
+                        <div class="vendor-info"><div class="vendor-rank">${index + 1}</div><div class="vendor-name">${name}</div></div>
+                        <div class="vendor-value">${formatCurrency(value)}</div>
+                    </div>`).join('');
+                vendorList.innerHTML = vendorListHTML;
+                const ratioHeaderHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
+                const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
+                    const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
+                    const color = index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)';
+                    return `<div class="ratio-item" style="margin-bottom: 8px;"><span>${name.split(' ')[0]}</span><span style="font-weight: 600; color: ${color};">${percentage.toFixed(1)}%</span></div>`;
+                }).join('');
+                ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
+            }
+        }
+
+        function renderEvolucaoChart(data) {
+            const salesByDate = data.reduce((acc, row) => {
+                const dateString = row.Data.toISOString().split('T')[0];
+                acc[dateString] = (acc[dateString] || 0) + row.Valor; 
+                return acc;
+            }, {});
+            const sortedDates = Object.entries(salesByDate).sort((a,b) => new Date(a[0]) - new Date(b[0]));
+            Highcharts.chart('chart-evolucao', { 
+                chart: { type: 'areaspline' }, title: { text: null }, 
+                xAxis: { categories: sortedDates.map(d => new Date(d[0]+"T00:00:00Z").toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'short' })) }, 
+                yAxis: { title: { text: null }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                plotOptions: { areaspline: { fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [ [0, 'rgba(20, 184, 166, 0.8)'], [1, 'rgba(20, 184, 166, 0.1)'] ] }, lineColor: '#14b8a6', lineWidth: 3, marker: { fillColor: '#14b8a6', lineColor: '#ffffff', lineWidth: 2, radius: 5 } } }, 
+                series: [{ name: 'Vendas', data: sortedDates.map(d => d[1]) }], 
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Vendas: ${formatCurrency(this.y)}`; } }
+            });
+        }
+
+        function renderClientesChart(data) {
+            const salesByCliente = data.reduce((acc, row) => {
+                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor; 
+                return acc;
+            }, {});
+            const sortedClientes = Object.entries(salesByCliente).sort(([,a],[,b]) => b-a).slice(0, 10);
+            Highcharts.chart('chart-clientes', { 
+                chart: { type: 'bar' }, title: { text: null }, 
+                xAxis: { categories: sortedClientes.map(c => c[0]), labels: { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } }, 
+                yAxis: { title: { enabled: false }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }], 
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Total: ${formatCurrency(this.y)}`; } }
+            });
+        }
+        
+        function setupHighchartsTheme() {
+            Highcharts.setOptions({ 
+                chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } }, 
+                title: { style: { color: 'var(--text-primary)' } }, 
+                xAxis: { labels: { style: { color: 'var(--text-secondary)' } }, lineColor: 'var(--border-color)', tickColor: 'var(--border-color)' }, 
+                yAxis: { title: { style: { color: 'var(--text-secondary)' } }, labels: { style: { color: 'var(--text-secondary)' } }, gridLineColor: 'var(--border-color)' }, 
+                legend: { itemStyle: { color: 'var(--text-primary)' } }, 
+                tooltip: { backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', style: { color: 'var(--text-primary)' } }, 
+                credits: { enabled: false } 
+            });
+        }
     </script>
 </body>
 </html>
