@@ -150,8 +150,6 @@
             color: white; 
             box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3); 
         }
-
-        /* Estilos para filtro de datas personalizado */
         .date-filter-container {
             display: flex;
             gap: 8px;
@@ -221,7 +219,6 @@
             color: var(--text-primary);
             border-color: var(--text-secondary);
         }
-
         .card { 
             background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); 
             border-radius: 16px; 
@@ -323,21 +320,21 @@
         .vendor-info { 
             display: flex; 
             align-items: center;
-            min-width: 0; /* CORREÇÃO DE LAYOUT: Permite encolhimento */
+            min-width: 0;
         }
         .vendor-name { 
             font-weight: 600; 
             font-size: 14px;
-            white-space: nowrap;     /* CORREÇÃO DE LAYOUT: Truncamento */
-            overflow: hidden;          /* CORREÇÃO DE LAYOUT: Truncamento */
-            text-overflow: ellipsis; /* CORREÇÃO DE LAYOUT: Truncamento */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .vendor-value { 
             font-weight: 700; 
             font-size: 15px; 
             color: var(--accent-teal);
-            flex-shrink: 0;      /* CORREÇÃO DE LAYOUT: Previne encolhimento */
-            margin-left: 16px;   /* CORREÇÃO DE LAYOUT: Adiciona espaçamento */
+            flex-shrink: 0;
+            margin-left: 16px;
         }
         .vendor-rank { 
             width: 28px; 
@@ -483,14 +480,11 @@
             border-radius: 8px; 
             cursor: pointer; 
         }
-
-        /* Responsividade */
         @media (max-width: 1600px) {
             .header-stats {
                 gap: 12px;
             }
         }
-
         @media (max-width: 1200px) {
             .dashboard {
                 grid-template-columns: 1fr 1fr;
@@ -506,7 +500,6 @@
                 gap: 24px;
             }
         }
-
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -651,7 +644,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     
     <script>
-        // --- INÍCIO DA SEÇÃO DE CONFIGURAÇÃO ---
         const firebaseConfig = {
             apiKey: "AIzaSyDl9TAAJxXCoyBjZa5xJVSx2-9ijq19iAs",
             authDomain: "dash-board-dsm.firebaseapp.com",
@@ -665,11 +657,10 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
         
-        let originalData = null; // Armazenará os dados do Firebase
-        let processedDataForPublish = null; // Armazena dados processados antes de publicar
-        let customDateFilter = null; // Armazena filtro de data personalizado
+        let originalData = null;
+        let processedDataForPublish = null;
+        let customDateFilter = null;
 
-        // --- LÓGICA PRINCIPAL DE ROTEAMENTO ---
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const isAdmin = urlParams.get('admin') === 'true';
@@ -677,7 +668,6 @@
             setupHighchartsTheme();
 
             if (isAdmin) {
-                // MODO ADMIN
                 auth.onAuthStateChanged(user => {
                     if (user) {
                         initializeAdminView();
@@ -686,12 +676,10 @@
                     }
                 });
             } else {
-                // MODO PÚBLICO
                 fetchAndDisplayPublicDashboard();
             }
         });
 
-        // --- FUNÇÕES DE LÓGICA DE VISUALIZAÇÃO ---
         function initializeLoginView() {
             document.getElementById('login-area').classList.remove('hidden');
             document.getElementById('upload-area').classList.add('hidden');
@@ -736,7 +724,6 @@
             }
         }
 
-        // --- FUNÇÕES DE AUTENTICAÇÃO E ADMIN ---
         async function handleAdminLogin(event) {
             event.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -768,17 +755,29 @@
             fileInput.addEventListener('change', e => handleFiles(e.target.files));
         }
 
-        // CORREÇÃO DE ENCODING APLICADA AQUI
+        // --- CORREÇÃO DEFINITIVA DE ENCODING ---
         function handleFiles(files) {
             if (files.length > 0) {
-                Papa.parse(files[0], {
-                    header: true,
-                    skipEmptyLines: true,
-                    delimiter: ";",
-                    encoding: "UTF-8", // CORREÇÃO: Força a leitura do CSV como UTF-8
-                    complete: results => processDataForPublishing(results.data),
-                    error: error => alert(`Erro no CSV: ${error.message}`)
-                });
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    const csvDataAsString = event.target.result;
+                    
+                    Papa.parse(csvDataAsString, {
+                        header: true,
+                        skipEmptyLines: true,
+                        delimiter: ";",
+                        complete: results => processDataForPublishing(results.data),
+                        error: error => alert(`Erro ao processar o CSV: ${error.message}`)
+                    });
+                };
+
+                reader.onerror = function() {
+                    alert('Não foi possível ler o arquivo. Erro: ' + reader.error);
+                };
+
+                reader.readAsText(file, 'UTF-8');
             }
         }
 
@@ -834,7 +833,6 @@
             }
         }
 
-        // --- FUNÇÕES DE FILTROS ---
         function setupFilters() {
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -926,7 +924,6 @@
             updateDashboardUI(filteredData);
         }
 
-        // --- FUNÇÕES DE RENDERIZAÇÃO ---
         function updateDashboardUI(data) {
             const periodBadge = document.getElementById('period-badge');
             if (data && data.length > 0) {
@@ -957,7 +954,6 @@
             document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
         }
 
-        // CORREÇÃO DE RENDERIZAÇÃO APLICADA AQUI
         function updateSidebar(data) {
             const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
             const salesByVendedor = data.reduce((acc, row) => {
@@ -965,15 +961,12 @@
                 return acc;
             }, {});
             const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b - a).slice(0, 5);
-
             const vendorList = document.getElementById('vendor-list');
             const ratioContainer = document.getElementById('performance-ratio');
-
             if (sortedVendedores.length === 0) {
                 vendorList.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nenhum vendedor no período.</p>`;
                 ratioContainer.innerHTML = '';
             } else {
-                // Otimização da renderização da lista de vendedores
                 const vendorListHTML = sortedVendedores.map(([name, value], index) => {
                     return `
                         <div class="vendor-item">
@@ -986,8 +979,6 @@
                     `;
                 }).join('');
                 vendorList.innerHTML = vendorListHTML;
-
-                // Otimização da renderização do ratio de performance
                 const ratioHeaderHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
                 const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
                     const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
