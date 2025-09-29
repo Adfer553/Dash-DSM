@@ -1,4 +1,4 @@
-<!DOCTYPE html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -323,21 +323,21 @@
         .vendor-info { 
             display: flex; 
             align-items: center;
-            min-width: 0; /* CORREÇÃO DE LAYOUT: Permite encolhimento */
+            min-width: 0;
         }
         .vendor-name { 
             font-weight: 600; 
             font-size: 14px;
-            white-space: nowrap;     /* CORREÇÃO DE LAYOUT: Truncamento */
-            overflow: hidden;          /* CORREÇÃO DE LAYOUT: Truncamento */
-            text-overflow: ellipsis; /* CORREÇÃO DE LAYOUT: Truncamento */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .vendor-value { 
             font-weight: 700; 
             font-size: 15px; 
             color: var(--accent-teal);
-            flex-shrink: 0;      /* CORREÇÃO DE LAYOUT: Previne encolhimento */
-            margin-left: 16px;   /* CORREÇÃO DE LAYOUT: Adiciona espaçamento */
+            flex-shrink: 0;
+            margin-left: 16px;
         }
         .vendor-rank { 
             width: 28px; 
@@ -533,36 +533,6 @@
 </head>
 <body>
     <div class="dashboard">
-        <div class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="dsm-logo">
-                        <img src="data:image/png;base64,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" alt="Logo DSM">
-                    </div>
-                    <div class="header-info">
-                        <h1>Torre de Controle - Vendas</h1>
-                        <p>Odontologia do Futuro | Dental Medicine Solutions</p>
-                    </div>
-                </div>
-                <div class="header-stats">
-                    <div id="period-badge" class="period-badge">Sem Dados</div>
-                    <div class="filters" style="display: none;">
-                        <button class="filter-btn active" data-filter="all">Tudo</button>
-                        <button class="filter-btn" data-filter="30">30d</button>
-                        <button class="filter-btn" data-filter="7">7d</button>
-                        <button class="filter-btn" data-filter="1">Hoje</button>
-                    </div>
-                    <div class="date-filter-container" style="display: none;">
-                        <input type="date" id="start-date" class="date-input" title="Data inicial">
-                        <span class="date-separator">até</span>
-                        <input type="date" id="end-date" class="date-input" title="Data final">
-                        <button class="apply-date-btn" id="apply-date-btn" title="Aplicar filtro de data">Aplicar</button>
-                        <button class="clear-date-btn" id="clear-date-btn" title="Limpar filtro de data">Limpar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="login-area hidden" id="login-area">
             <div class="login-text">Acesso Administrador</div>
             <form class="login-form" id="login-form">
@@ -768,14 +738,32 @@
             fileInput.addEventListener('change', e => handleFiles(e.target.files));
         }
 
-        // CORREÇÃO DE ENCODING APLICADA AQUI
+        function cleanText(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/�/g, 'ó')  // Corrige caracteres mal codificados comuns
+                .replace(/Ã¡/g, 'á')
+                .replace(/Ã©/g, 'é')
+                .replace(/Ã­/g, 'í')
+                .replace(/Ã³/g, 'ó')
+                .replace(/Ãº/g, 'ú')
+                .replace(/Ã /g, 'à')
+                .replace(/Ã§/g, 'ç')
+                .replace(/Ã¢/g, 'â')
+                .replace(/Ãª/g, 'ê')
+                .replace(/Ã´/g, 'ô')
+                .replace(/Ã¼/g, 'ü')
+                .replace(/Ã±/g, 'ñ')
+                .trim();
+        }
+
         function handleFiles(files) {
             if (files.length > 0) {
                 Papa.parse(files[0], {
-                    header: true,
-                    skipEmptyLines: true,
+                    header: true, 
+                    skipEmptyLines: true, 
                     delimiter: ";",
-                    encoding: "UTF-8", // CORREÇÃO: Força a leitura do CSV como UTF-8
+                    encoding: "UTF-8",
                     complete: results => processDataForPublishing(results.data),
                     error: error => alert(`Erro no CSV: ${error.message}`)
                 });
@@ -786,13 +774,43 @@
             const statusMessage = document.getElementById('status-message');
             try {
                 const allRows = data.map(row => {
-                    const valorStr = String(row.Valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.');
+                    const valorStr = String(row.Valor || '0').replace('R class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="dsm-logo">
+                        <img src="data:image/png;base64,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" alt="Logo DSM">
+                    </div>
+                    <div class="header-info">
+                        <h1>Torre de Controle - Vendas</h1>
+                        <p>Odontologia do Futuro | Dental Medicine Solutions</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div id="period-badge" class="period-badge">Sem Dados</div>
+                    <div class="filters" style="display: none;">
+                        <button class="filter-btn active" data-filter="all">Tudo</button>
+                        <button class="filter-btn" data-filter="30">30d</button>
+                        <button class="filter-btn" data-filter="7">7d</button>
+                        <button class="filter-btn" data-filter="1">Hoje</button>
+                    </div>
+                    <div class="date-filter-container" style="display: none;">
+                        <input type="date" id="start-date" class="date-input" title="Data inicial">
+                        <span class="date-separator">até</span>
+                        <input type="date" id="end-date" class="date-input" title="Data final">
+                        <button class="apply-date-btn" id="apply-date-btn" title="Aplicar filtro de data">Aplicar</button>
+                        <button class="clear-date-btn" id="clear-date-btn" title="Limpar filtro de data">Limpar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div, '').trim().replace(/\./g, '').replace(',', '.');
                     const valor = parseFloat(valorStr);
                     if (isNaN(valor) || !row.Data || !row.Vendedor || !row.Cliente) return null;
                     const [day, month, year] = row.Data.split('/');
                     return {
-                        Vendedor: row.Vendedor.trim(),
-                        Cliente: row.Cliente.trim(),
+                        Vendedor: cleanText(row.Vendedor),
+                        Cliente: cleanText(row.Cliente),
                         Data: new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString(),
                         Valor: valor
                     };
@@ -840,6 +858,7 @@
                 btn.addEventListener('click', function() {
                     if (!originalData) return;
                     
+                    // Resetar filtro de data personalizado
                     customDateFilter = null;
                     document.getElementById('start-date').value = '';
                     document.getElementById('end-date').value = '';
@@ -898,15 +917,15 @@
                 filteredData = originalData;
             } else {
                 const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0); // Normaliza para o início do dia
                 
-                if (days === '1') {
+                if (days === '1') { // Filtro para "Hoje"
                     filteredData = originalData.filter(row => {
                         const rowDate = new Date(row.Data);
                         rowDate.setHours(0, 0, 0, 0);
                         return rowDate.getTime() === today.getTime();
                     });
-                } else {
+                } else { // Filtro para 7 ou 30 dias
                     const cutoffDate = new Date(today);
                     cutoffDate.setDate(today.getDate() - parseInt(days) + 1);
                     filteredData = originalData.filter(row => row.Data >= cutoffDate);
@@ -957,49 +976,27 @@
             document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
         }
 
-        // CORREÇÃO DE RENDERIZAÇÃO APLICADA AQUI
         function updateSidebar(data) {
             const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
             const salesByVendedor = data.reduce((acc, row) => {
-                acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
+                acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor; 
                 return acc;
             }, {});
-            const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b - a).slice(0, 5);
-
+            const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b-a).slice(0, 5);
+            
             const vendorList = document.getElementById('vendor-list');
             const ratioContainer = document.getElementById('performance-ratio');
+            vendorList.innerHTML = '';
+            ratioContainer.innerHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
 
-            if (sortedVendedores.length === 0) {
+            if(sortedVendedores.length === 0){
                 vendorList.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nenhum vendedor no período.</p>`;
-                ratioContainer.innerHTML = '';
             } else {
-                // Otimização da renderização da lista de vendedores
-                const vendorListHTML = sortedVendedores.map(([name, value], index) => {
-                    return `
-                        <div class="vendor-item">
-                            <div class="vendor-info">
-                                <div class="vendor-rank">${index + 1}</div>
-                                <div class="vendor-name">${name}</div>
-                            </div>
-                            <div class="vendor-value">${formatCurrency(value)}</div>
-                        </div>
-                    `;
-                }).join('');
-                vendorList.innerHTML = vendorListHTML;
-
-                // Otimização da renderização do ratio de performance
-                const ratioHeaderHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
-                const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
+                sortedVendedores.forEach(([name, value], index) => {
+                    vendorList.innerHTML += `<div class="vendor-item"><div class="vendor-info"><div class="vendor-rank">${index + 1}</div><div class="vendor-name">${name}</div></div><div class="vendor-value">${formatCurrency(value)}</div></div>`;
                     const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
-                    const color = index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)';
-                    return `
-                        <div class="ratio-item" style="margin-bottom: 8px;">
-                            <span>${name.split(' ')[0]}</span>
-                            <span style="font-weight: 600; color: ${color};">${percentage.toFixed(1)}%</span>
-                        </div>
-                    `;
-                }).join('');
-                ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
+                    ratioContainer.innerHTML += `<div class="ratio-item" style="margin-bottom: 8px;"><span>${name.split(' ')[0]}</span><span style="font-weight: 600; color: ${index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)'};">${percentage.toFixed(1)}%</span></div>`;
+                });
             }
         }
 
@@ -1143,4 +1140,34 @@
         }
     </script>
 </body>
-</html>
+</html> class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="dsm-logo">
+                        <img src="data:image/png;base64,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" alt="Logo DSM">
+                    </div>
+                    <div class="header-info">
+                        <h1>Torre de Controle - Vendas</h1>
+                        <p>Odontologia do Futuro | Dental Medicine Solutions</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div id="period-badge" class="period-badge">Sem Dados</div>
+                    <div class="filters" style="display: none;">
+                        <button class="filter-btn active" data-filter="all">Tudo</button>
+                        <button class="filter-btn" data-filter="30">30d</button>
+                        <button class="filter-btn" data-filter="7">7d</button>
+                        <button class="filter-btn" data-filter="1">Hoje</button>
+                    </div>
+                    <div class="date-filter-container" style="display: none;">
+                        <input type="date" id="start-date" class="date-input" title="Data inicial">
+                        <span class="date-separator">até</span>
+                        <input type="date" id="end-date" class="date-input" title="Data final">
+                        <button class="apply-date-btn" id="apply-date-btn" title="Aplicar filtro de data">Aplicar</button>
+                        <button class="clear-date-btn" id="clear-date-btn" title="Limpar filtro de data">Limpar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
