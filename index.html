@@ -518,8 +518,7 @@
             document.getElementById('kpi-count').textContent = numVendas.toLocaleString('pt-BR');
             document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
         }
-       // --- FUNÇÕES DE RENDERIZAÇÃO ---
-function updateSidebar(data) {
+       function updateSidebar(data) {
     const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
     const salesByVendedor = data.reduce((acc, row) => {
         acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
@@ -574,7 +573,40 @@ function updateSidebar(data) {
         ratioContainer.insertAdjacentElement("afterend", metaContainer);
     }
 }
+        function renderEvolucaoChart(data) {
+            const salesByDate = data.reduce((acc, row) => {
+                const dateString = row.Data.toISOString().split('T')[0];
+                acc[dateString] = (acc[dateString] || 0) + row.Valor; 
+                return acc;
+            }, {});
+            const sortedDates = Object.entries(salesByDate).sort((a,b) => new Date(a[0]) - new Date(b[0]));
+            Highcharts.chart('chart-evolucao', { 
+                chart: { type: 'areaspline' }, title: { text: null }, 
+                xAxis: { categories: sortedDates.map(d => new Date(d[0]+"T00:00:00Z").toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'short' })) }, 
+                yAxis: { title: { text: null }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                plotOptions: { areaspline: { fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [ [0, 'rgba(20, 184, 166, 0.8)'], [1, 'rgba(20, 184, 166, 0.1)'] ] }, lineColor: '#14b8a6', lineWidth: 3, marker: { fillColor: '#14b8a6', lineColor: '#ffffff', lineWidth: 2, radius: 5 } } }, 
+                series: [{ name: 'Vendas', data: sortedDates.map(d => d[1]) }], 
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Vendas: ${formatCurrency(this.y)}`; } }
+            });
+        }
 
+        function renderClientesChart(data) {
+            const salesByCliente = data.reduce((acc, row) => {
+                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor; 
+                return acc;
+            }, {});
+            const sortedClientes = Object.entries(salesByCliente).sort(([,a],[,b]) => b-a).slice(0, 10);
+            Highcharts.chart('chart-clientes', { 
+                chart: { type: 'bar' }, title: { text: null }, 
+                xAxis: { categories: sortedClientes.map(c => c[0]), labels: { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } }, 
+                yAxis: { title: { enabled: false }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }], 
+                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Total: ${formatCurrency(this.y)}`; } }
+            });
+        }
+        
         function setupHighchartsTheme() {
             Highcharts.setOptions({ 
                 chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } }, 
@@ -589,6 +621,3 @@ function updateSidebar(data) {
     </script>
 </body>
 </html>
-
-
-
