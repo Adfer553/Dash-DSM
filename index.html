@@ -518,47 +518,61 @@
             document.getElementById('kpi-count').textContent = numVendas.toLocaleString('pt-BR');
             document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
         }
+       function updateSidebar(data) {
+    const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
+    const salesByVendedor = data.reduce((acc, row) => {
+        acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
+        return acc;
+    }, {});
+    const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b - a).slice(0, 5);
+    const vendorList = document.getElementById('vendor-list');
+    const ratioContainer = document.getElementById('performance-ratio');
 
-        function updateSidebar(data) {
-            const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
-            const salesByVendedor = data.reduce((acc, row) => {
-                acc[row.Vendedor] = (acc[row.Vendedor] || 0) + row.Valor;
-                return acc;
-            }, {});
-            const sortedVendedores = Object.entries(salesByVendedor).sort(([,a],[,b]) => b - a).slice(0, 5);
-            const vendorList = document.getElementById('vendor-list');
-            const ratioContainer = document.getElementById('performance-ratio');
-            if (sortedVendedores.length === 0) {
-                vendorList.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nenhum vendedor no período.</p>`;
-                ratioContainer.innerHTML = '';
-            } else {
-                const vendorListHTML = sortedVendedores.map(([name, value], index) => {
-                    return `
-                        <div class="vendor-item">
-                            <div class="vendor-info">
-                                <div class="vendor-rank">${index + 1}</div>
-                                <div class="vendor-name">${name}</div>
-                            </div>
-                            <div class="vendor-value">${formatCurrency(value)}</div>
-                        </div>
-                    `;
-                }).join('');
-                vendorList.innerHTML = vendorListHTML;
-                const ratioHeaderHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
-                const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
-                    const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
-                    const color = index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)';
-                    return `
-                        <div class="ratio-item" style="margin-bottom: 8px;">
-                            <span>${name.split(' ')[0]}</span>
-                            <span style="font-weight: 600; color: ${color};">${percentage.toFixed(1)}%</span>
-                        </div>
-                    `;
-                }).join('');
-                ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
-            }
-        }
+    if (sortedVendedores.length === 0) {
+        vendorList.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Nenhum vendedor no período.</p>`;
+        ratioContainer.innerHTML = '';
+    } else {
+        const vendorListHTML = sortedVendedores.map(([name, value], index) => {
+            return `
+                <div class="vendor-item">
+                    <div class="vendor-info">
+                        <div class="vendor-rank">${index + 1}</div>
+                        <div class="vendor-name">${name}</div>
+                    </div>
+                    <div class="vendor-value">${formatCurrency(value)}</div>
+                </div>
+            `;
+        }).join('');
+        vendorList.innerHTML = vendorListHTML;
 
+        // Performance Ratio
+        const ratioHeaderHTML = `<h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Performance Ratio (Top 5)</h4>`;
+        const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
+            const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
+            const color = index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)';
+            return `
+                <div class="ratio-item" style="margin-bottom: 8px;">
+                    <span>${name.split(' ')[0]}</span>
+                    <span style="font-weight: 600; color: ${color};">${percentage.toFixed(1)}%</span>
+                </div>
+            `;
+        }).join('');
+        ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
+
+        // 🔹 NOVA SEÇÃO: META X REALIZADO
+        const meta = 35000;
+        const realizado = totalVendas;
+
+        const metaContainer = document.createElement("div");
+        metaContainer.className = "performance-ratio";
+        metaContainer.innerHTML = `
+            <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Meta x Realizado</h4>
+            <div class="ratio-item"><span>Meta</span><span style="font-weight: 600; color: var(--accent-orange);">${formatCurrency(meta)}</span></div>
+            <div class="ratio-item"><span>Realizado</span><span style="font-weight: 600; color: var(--accent-green);">${formatCurrency(realizado)}</span></div>
+        `;
+        ratioContainer.insertAdjacentElement("afterend", metaContainer);
+    }
+}
         function renderEvolucaoChart(data) {
             const salesByDate = data.reduce((acc, row) => {
                 const dateString = row.Data.toISOString().split('T')[0];
@@ -607,3 +621,4 @@
     </script>
 </body>
 </html>
+
