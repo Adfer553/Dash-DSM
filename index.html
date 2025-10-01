@@ -563,7 +563,6 @@ function updateSidebar(data) {
         // 🔹 NOVA SEÇÃO: META X REALIZADO
         const meta = 35000;
         const realizado = totalVendas;
-        const percentual = meta > 0 ? (realizado / meta) * 100 : 0;
 
         const metaContainer = document.createElement("div");
         metaContainer.className = "performance-ratio";
@@ -571,28 +570,11 @@ function updateSidebar(data) {
             <h4 style="color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">Meta x Realizado</h4>
             <div class="ratio-item"><span>Meta</span><span style="font-weight: 600; color: var(--accent-orange);">${formatCurrency(meta)}</span></div>
             <div class="ratio-item"><span>Realizado</span><span style="font-weight: 600; color: var(--accent-green);">${formatCurrency(realizado)}</span></div>
-            <div class="ratio-item"><span>Atingimento</span><span style="font-weight: 600; color: ${percentual >= 100 ? 'var(--accent-teal)' : 'var(--accent-blue)'};">${percentual.toFixed(1)}%</span></div>
         `;
         ratioContainer.insertAdjacentElement("afterend", metaContainer);
     }
 }
 
-        function renderClientesChart(data) {
-            const salesByCliente = data.reduce((acc, row) => {
-                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor; 
-                return acc;
-            }, {});
-            const sortedClientes = Object.entries(salesByCliente).sort(([,a],[,b]) => b-a).slice(0, 10);
-            Highcharts.chart('chart-clientes', { 
-                chart: { type: 'bar' }, title: { text: null }, 
-                xAxis: { categories: sortedClientes.map(c => c[0]), labels: { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } }, 
-                yAxis: { title: { enabled: false }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
-                legend: { enabled: false }, 
-                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }], 
-                tooltip: { formatter: function() { return `<b>${this.x}</b><br>Total: ${formatCurrency(this.y)}`; } }
-            });
-        }
-        
         function setupHighchartsTheme() {
             Highcharts.setOptions({ 
                 chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } }, 
@@ -607,5 +589,6 @@ function updateSidebar(data) {
     </script>
 </body>
 </html>
+
 
 
