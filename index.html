@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DSM Torre de Controle - Dashboard de Vendas</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
     :root {
       --dsm-blue: #1f4788;
       --dsm-green: #4caf50;
@@ -18,54 +17,29 @@
       --text-primary: #ffffff;
       --text-secondary: #cbd5e0;
       --text-muted: #a0aec0;
-      --accent-blue: #3b82f6;
-      --accent-teal: #14b8a6;
-      --accent-orange: #f59e0b;
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
       --gradient-dsm: linear-gradient(135deg, var(--dsm-blue) 0%, var(--dsm-green) 100%);
-      --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-      --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 1.6;
       font-size: 14px;
       overflow-x: auto;
     }
-
-    /* =============================
-       DASHBOARD GRID
-    ============================= */
     .dashboard {
       padding: 24px;
       max-width: 1920px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 320px 1fr 1fr 1fr;
-      grid-template-rows: auto auto 1fr;
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
       gap: 24px;
       min-height: 100vh;
-      grid-template-areas:
-        "header header header header"
-        "sidebar kpi1 kpi2 kpi3"
-        "sidebar chart1 chart1 chart2";
     }
-
-    /* HEADER */
     .header {
-      grid-area: header;
       background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
       border-radius: 16px;
       padding: 24px 32px;
@@ -74,62 +48,98 @@
       overflow: hidden;
       box-shadow: var(--shadow-lg);
     }
-
     .header::before {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
+      position: absolute; top:0; left:0; right:0; height:6px;
       background: var(--gradient-dsm);
     }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      z-index: 2;
+    .header-content { display:flex; justify-content:space-between; align-items:center; gap:24px; }
+    .header-left { display:flex; align-items:center; gap:24px; }
+    .dsm-logo img { height:45px; width:auto; display:block; }
+    .header-info h1 {
+      font-size: 28px; font-weight: 700; margin: 0;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .period-badge {
+      background: var(--gradient-dsm);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* ... (todo o CSS segue igual ao que você forneceu) ... */
+    .upload-area, .login-area {
+      padding: 32px;
+      border: 3px dashed var(--border-color);
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.4s ease;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    }
+    .upload-area.hidden, .login-area.hidden { display:none; }
+    .upload-area:hover, .login-area:hover {
+      border-color: var(--dsm-blue);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(31, 71, 136, 0.15);
+    }
+    .upload-area.active { border-color: var(--dsm-green); }
+    .upload-icon { font-size: 48px; margin-bottom: 16px; color: var(--dsm-blue); }
+    .upload-text { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .upload-subtext { font-size: 14px; color: var(--text-muted); }
+    .upload-highlight { color: var(--dsm-blue); font-weight: 700; cursor:pointer; }
+    .publish-container { text-align:center; margin-top: 16px; }
+    .publish-btn {
+      background: var(--gradient-dsm);
+      color:#fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .publish-btn:disabled { background: var(--border-color); cursor:not-allowed; }
+    .status-message { margin-top: 12px; font-size: 13px; font-weight: 500; }
+    .status-message.success { color: #10b981; }
+    .status-message.error { color: #ef4444; }
+    .login-form { display:flex; flex-direction:column; gap:12px; max-width:360px; margin:16px auto 0; }
+    .login-input {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px; border-radius: 8px; font-size: 14px;
+    }
+    .login-btn {
+      background: #3b82f6; color:#fff; font-weight:600;
+      padding: 12px; border:none; border-radius: 8px; cursor:pointer;
+    }
   </style>
 </head>
 <body>
   <div class="dashboard">
+
     <!-- HEADER -->
     <div class="header">
       <div class="header-content">
         <div class="header-left">
           <div class="dsm-logo">
-            <img src="data:image/png;base64,..." alt="Logo DSM">
+            <img src="" alt="Logo DSM" id="company-logo">
           </div>
           <div class="header-info">
             <h1>DSM - Dash Comercial</h1>
-            <p style="display: none;"></p>
           </div>
         </div>
         <div class="header-stats">
           <div id="period-badge" class="period-badge">Sem Dados</div>
-          <div class="filters" style="display: none;">
-            <button class="filter-btn active" data-filter="all">Tudo</button>
-            <button class="filter-btn" data-filter="30">30d</button>
-            <button class="filter-btn" data-filter="7">7d</button>
-            <button class="filter-btn" data-filter="1">Hoje</button>
-          </div>
-          <div class="date-filter-container" style="display: none;">
-            <input type="date" id="start-date" class="date-input" title="Data inicial">
-            <span class="date-separator">até</span>
-            <input type="date" id="end-date" class="date-input" title="Data final">
-            <button class="apply-date-btn" id="apply-date-btn" title="Aplicar filtro de data">Aplicar</button>
-            <button class="clear-date-btn" id="clear-date-btn" title="Limpar filtro de data">Limpar</button>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- ÁREA DE LOGIN -->
+    <!-- LOGIN ADMIN -->
     <div class="login-area hidden" id="login-area">
       <div class="login-text">Acesso Administrador</div>
       <form class="login-form" id="login-form">
@@ -140,40 +150,40 @@
       <div class="status-message" id="login-status-message"></div>
     </div>
 
-    <!-- ÁREA DE UPLOAD -->
+    <!-- UPLOAD CSV (ADMIN) -->
     <div class="upload-area hidden" id="upload-area">
       <div class="upload-icon">📊</div>
       <div class="upload-text">Carregar Relatório de Vendas</div>
       <div class="upload-subtext">Arraste seu arquivo CSV aqui ou <span class="upload-highlight">clique para selecionar</span></div>
       <input type="file" id="csv-file" accept=".csv" style="display:none;">
-      <div class="publish-container" id="publish-container" style="display: none;">
+      <div class="publish-container" id="publish-container" style="display:none;">
         <button class="publish-btn" id="publish-btn" disabled>Publicar Dados</button>
         <div class="status-message" id="status-message"></div>
       </div>
     </div>
 
-    <!-- CARDS KPI -->
-    <div class="card kpi-card" id="kpi-card-1" style="display: none;">...</div>
-    <div class="card kpi-card" id="kpi-card-2" style="display: none;">...</div>
-    <div class="card kpi-card" id="kpi-card-3" style="display: none;">...</div>
+    <!-- UPLOAD LOGO (ADMIN) -->
+    <div class="upload-area hidden" id="logo-upload-area">
+      <div class="upload-icon">🖼️</div>
+      <div class="upload-text">Carregar Logo da Empresa</div>
+      <div class="upload-subtext">Arraste sua imagem aqui ou <span class="upload-highlight">clique para selecionar</span></div>
+      <input type="file" id="logo-file" accept="image/*" style="display:none;">
+      <div class="publish-container" id="logo-publish-container" style="display:none;">
+        <button class="publish-btn" id="logo-publish-btn" disabled>Publicar Logo</button>
+        <div class="status-message" id="logo-status-message"></div>
+      </div>
+    </div>
 
-    <!-- SIDEBAR -->
-    <div class="card sidebar-card" id="sidebar-card" style="display: none;">...</div>
-
-    <!-- GRÁFICOS -->
-    <div class="card large-card" id="chart-card-1" style="display: none;">...</div>
-    <div class="card large-card" id="chart-card-2" style="display: none;">...</div>
   </div>
 
-  <!-- BIBLIOTECAS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
 
   <script>
-    // --- CONFIGURAÇÃO FIREBASE ---
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDl9TAAJxXCoyBjZa5xJVSx2-9ijq19iAs",
       authDomain: "dash-board-dsm.firebaseapp.com",
@@ -182,15 +192,160 @@
       messagingSenderId: "539970664229",
       appId: "1:539970664229:web:c84df6bcf621d85fab0ccc"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
-    let originalData = null;
-    let processedDataForPublish = null;
-    let customDateFilter = null;
 
-    // --- FUNÇÕES (as que você enviou seguem aqui) ---
+    // Roteamento inicial
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdmin = urlParams.get('admin') === 'true';
+
+      if (isAdmin) {
+        auth.onAuthStateChanged(user => {
+          if (user) initializeAdminView();
+          else initializeLoginView();
+        });
+      } else {
+        fetchAndDisplayPublicDashboard();
+      }
+    });
+
+    // Views
+    function initializeLoginView() {
+      document.getElementById('login-area').classList.remove('hidden');
+      document.getElementById('login-form').addEventListener('submit', handleAdminLogin);
+    }
+
+    function initializeAdminView() {
+      document.getElementById('login-area').classList.add('hidden');
+      document.getElementById('upload-area').classList.remove('hidden');
+      document.getElementById('logo-upload-area').classList.remove('hidden');
+
+      // CSV handlers (apenas clique/drag para selecionar arquivo; publicação real do CSV
+      // já existe no seu projeto completo — aqui estamos focando no upload de logo)
+      const csvUploadArea = document.getElementById('upload-area');
+      const csvInput = document.getElementById('csv-file');
+      csvUploadArea.addEventListener('click', () => csvInput.click());
+      ['dragenter','dragover','dragleave','drop'].forEach(e =>
+        csvUploadArea.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); })
+      );
+      ['dragenter','dragover'].forEach(e => csvUploadArea.addEventListener(e, () => csvUploadArea.classList.add('active')));
+      ['dragleave','drop'].forEach(e => csvUploadArea.addEventListener(e, () => csvUploadArea.classList.remove('active')));
+      csvUploadArea.addEventListener('drop', e => { csvInput.files = e.dataTransfer.files; });
+
+      // Logo handlers
+      setupLogoUploadArea();
+      // Exibir logo atual no admin também
+      loadCurrentLogo();
+      document.getElementById('period-badge').textContent = 'Modo Admin';
+    }
+
+    async function fetchAndDisplayPublicDashboard() {
+      try {
+        const doc = await db.collection('dashboard').doc('dados').get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.logoUrl) {
+            document.getElementById('company-logo').src = data.logoUrl;
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados públicos:', err);
+      }
+    }
+
+    // Login
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const statusMessage = document.getElementById('login-status-message');
+      statusMessage.textContent = 'Autenticando...';
+      statusMessage.className = 'status-message';
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        statusMessage.textContent = '';
+      } catch (error) {
+        statusMessage.textContent = `Erro: ${error.message}`;
+        statusMessage.className = 'status-message error';
+      }
+    }
+
+    // ===== Upload de LOGO =====
+    function setupLogoUploadArea() {
+      const logoUploadArea = document.getElementById('logo-upload-area');
+      const fileInput = document.getElementById('logo-file');
+      const publishBtn = document.getElementById('logo-publish-btn');
+
+      ['dragenter','dragover','dragleave','drop'].forEach(e =>
+        logoUploadArea.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); })
+      );
+      ['dragenter','dragover'].forEach(e => logoUploadArea.addEventListener(e, () => logoUploadArea.classList.add('active')));
+      ['dragleave','drop'].forEach(e => logoUploadArea.addEventListener(e, () => logoUploadArea.classList.remove('active')));
+      logoUploadArea.addEventListener('drop', e => handleLogoFile(e.dataTransfer.files));
+      logoUploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', e => handleLogoFile(e.target.files));
+
+      publishBtn.addEventListener('click', publishLogoToFirebase);
+    }
+
+    let logoFileForPublish = null;
+    function handleLogoFile(files) {
+      if (files.length > 0) {
+        logoFileForPublish = files[0];
+        document.getElementById('logo-publish-container').style.display = 'block';
+        document.getElementById('logo-publish-btn').disabled = false;
+        const msg = document.getElementById('logo-status-message');
+        msg.textContent = `Logo selecionada: ${logoFileForPublish.name}`;
+        msg.className = 'status-message';
+      }
+    }
+
+    async function publishLogoToFirebase() {
+      if (!logoFileForPublish) return;
+
+      const publishBtn = document.getElementById('logo-publish-btn');
+      const statusMessage = document.getElementById('logo-status-message');
+      publishBtn.disabled = true;
+      publishBtn.textContent = 'Publicando Logo...';
+      statusMessage.className = 'status-message';
+      statusMessage.textContent = 'Enviando logo...';
+
+      try {
+        const storageRef = firebase.storage().ref();
+        const logoRef = storageRef.child('logos/company-logo.png');
+        await logoRef.put(logoFileForPublish);
+        const url = await logoRef.getDownloadURL();
+
+        await db.collection('dashboard').doc('dados').set({ logoUrl: url }, { merge: true });
+
+        statusMessage.textContent = 'Logo publicada com sucesso!';
+        statusMessage.className = 'status-message success';
+        publishBtn.textContent = 'Publicar Nova Logo';
+
+        // Atualiza imediatamente a logo no header
+        document.getElementById('company-logo').src = url;
+      } catch (error) {
+        console.error('Erro ao publicar logo:', error);
+        statusMessage.textContent = `Erro ao publicar logo: ${error.message}`;
+        statusMessage.className = 'status-message error';
+        publishBtn.textContent = 'Tentar Novamente';
+      } finally {
+        publishBtn.disabled = false;
+      }
+    }
+
+    async function loadCurrentLogo() {
+      try {
+        const doc = await db.collection('dashboard').doc('dados').get();
+        if (doc.exists && doc.data().logoUrl) {
+          document.getElementById('company-logo').src = doc.data().logoUrl;
+        }
+      } catch (e) {
+        console.warn('Não foi possível carregar a logo atual:', e);
+      }
+    }
   </script>
 </body>
 </html>
