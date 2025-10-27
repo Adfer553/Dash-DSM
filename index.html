@@ -1,515 +1,506 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSM Torre de Controle - Dashboard de Vendas</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        :root { 
-            --dsm-blue: #1f4788; 
-            --dsm-green: #4caf50; 
-            --bg-primary: #0f1419; 
-            --bg-secondary: #1a202c; 
-            --bg-card: #2d3748; 
-            --bg-card-hover: #374151; 
-            --border-color: #4a5568; 
-            --text-primary: #ffffff; 
-            --text-secondary: #cbd5e0; 
-            --text-muted: #a0aec0; 
-            --accent-blue: #3b82f6; 
-            --accent-teal: #14b8a6; 
-            --accent-orange: #f59e0b; 
-            --accent-green: #10b981; 
-            --accent-red: #ef4444; 
-            --gradient-dsm: linear-gradient(135deg, var(--dsm-blue) 0%, var(--dsm-green) 100%); 
-            --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
-            --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); 
-            --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
-            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2); 
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: var(--bg-primary); 
-            color: var(--text-primary); 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            line-height: 1.6; 
-            font-size: 14px; 
-            overflow-x: auto; 
-        }
-        .dashboard { 
-            padding: 24px; 
-            max-width: 1920px; 
-            margin: 0 auto; 
-            display: grid; 
-            grid-template-columns: 320px 1fr 1fr 1fr; 
-            grid-template-rows: auto auto 1fr; 
-            gap: 24px; 
-            min-height: 100vh; 
-            grid-template-areas: 
-                "header header header header" 
-                "sidebar kpi1 kpi2 kpi3" 
-                "sidebar chart1 chart1 chart2"; 
-        }
-        .header { 
-            grid-area: header; 
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); 
-            border-radius: 16px; 
-            padding: 24px 32px; /* Ajuste no padding para a nova logo */
-            border: 2px solid var(--border-color); 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: var(--shadow-lg); 
-        }
-        .header::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            height: 6px; 
-            background: var(--gradient-dsm); 
-        }
-        .header-content { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: relative; 
-            z-index: 2; 
-        }
-        .header-left { 
-            display: flex; 
-            align-items: center; 
-            gap: 24px; 
-        }
-        .dsm-logo img { 
-            height: 45px; /* Altura ajustada para a nova logo */
-            width: auto;
-        }
-        .header-info h1 { 
-            font-size: 28px; /* Tamanho ajustado para o novo título */
-            font-weight: 700; 
-            margin: 0; /* Removida margem para melhor alinhamento */
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
-        .header-info p { 
-            display: none; /* Escondendo o subtítulo antigo */
-        }
-        .header-stats { 
-            display: flex; 
-            gap: 16px; 
-            align-items: center; 
-            flex-wrap: wrap;
-        }
-        .period-badge { 
-            background: var(--gradient-dsm); 
-            padding: 12px 24px; 
-            border-radius: 12px; 
-            font-weight: 600; 
-            font-size: 14px; 
-            color: white; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
-        .filters { 
-            display: flex; 
-            gap: 12px; 
-            background: var(--bg-secondary); 
-            padding: 8px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border-color); 
-            flex-wrap: wrap;
-        }
-        .filter-btn { 
-            padding: 12px 20px; 
-            background: transparent; 
-            border: none; 
-            color: var(--text-secondary); 
-            border-radius: 8px; 
-            font-size: 13px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-        .filter-btn:hover { 
-            background: var(--bg-card-hover); 
-            color: var(--text-primary); 
-            transform: translateY(-1px); 
-        }
-        .filter-btn.active { 
-            background: var(--gradient-dsm); 
-            color: white; 
-            box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3); 
-        }
-        .date-filter-container {
-            display: flex;
-            gap: 8px;
-            background: var(--bg-secondary);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .date-input {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.3s ease;
-            min-width: 130px;
-            color-scheme: dark;
-        }
-        .date-input::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
-            cursor: pointer;
-        }
-        .date-input:focus {
-            border-color: var(--dsm-blue);
-            box-shadow: 0 0 0 2px rgba(31, 71, 136, 0.3);
-        }
-        .date-separator {
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .apply-date-btn {
-            background: var(--gradient-dsm);
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .apply-date-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3);
-        }
-        .clear-date-btn {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .clear-date-btn:hover {
-            color: var(--text-primary);
-            border-color: var(--text-secondary);
-        }
-        .card { 
-            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); 
-            border-radius: 16px; 
-            border: 1px solid var(--border-color); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            position: relative; 
-            overflow: hidden; 
-        }
-        .card:hover { 
-            transform: translateY(-8px); 
-            border-color: var(--dsm-blue); 
-            box-shadow: 0 20px 40px rgba(31, 71, 136, 0.2); 
-        }
-        .card-header { 
-            padding: 24px 24px 20px; 
-            border-bottom: 1px solid var(--border-color); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: relative; 
-            z-index: 2; 
-        }
-        .card-title { 
-            font-size: 13px; 
-            font-weight: 700; 
-            color: var(--text-secondary); 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-        }
-        .card-icon { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 18px; 
-            color: white; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
-        }
-        .kpi-card { grid-area: kpi1; } 
-        #kpi-card-2 { grid-area: kpi2; } 
-        #kpi-card-3 { grid-area: kpi3; }
-        .kpi-content { 
-            padding: 32px 24px; 
-            text-align: center; 
-            position: relative; 
-            z-index: 2; 
-        }
-        .kpi-value { 
-            font-size: 36px; 
-            font-weight: 900; 
-            margin-bottom: 12px; 
-            background: var(--gradient-teal); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            font-family: 'Inter', monospace; 
-            letter-spacing: -1px; 
-        }
-        .kpi-value.orange { 
-            background: var(--gradient-orange); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
-        .kpi-value.blue { 
-            background: var(--gradient-blue); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
-        .kpi-subtitle { 
-            font-size: 13px; 
-            color: var(--text-muted); 
-            font-weight: 500; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
-        .sidebar-card { 
-            grid-area: sidebar; 
-            padding: 0; 
-        }
-        .vendor-list { 
-            padding: 24px; 
-        }
-        .vendor-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 16px; 
-            background: var(--bg-secondary); 
-            border-radius: 12px; 
-            margin-bottom: 12px; 
-            border: 1px solid var(--border-color); 
-            transition: all 0.3s ease; 
-        }
-        .vendor-item:hover { 
-            background: var(--bg-card-hover); 
-            transform: translateX(4px); 
-        }
-        .vendor-info { 
-            display: flex; 
-            align-items: center;
-            min-width: 0; 
-        }
-        .vendor-name { 
-            font-weight: 600; 
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .vendor-value { 
-            font-weight: 700; 
-            font-size: 15px; 
-            color: var(--accent-teal);
-            flex-shrink: 0;
-            margin-left: 16px;
-        }
-        .vendor-rank { 
-            width: 28px; 
-            height: 28px; 
-            background: var(--gradient-dsm); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 12px; 
-            font-weight: 700; 
-            color: white; 
-            margin-right: 12px; 
-            flex-shrink: 0; 
-        }
-        .performance-ratio { 
-            margin: 0 24px 24px 24px; 
-            padding: 20px; 
-            background: var(--bg-secondary); 
-            border-radius: 12px; 
-            border: 1px solid var(--border-color); 
-        }
-        .ratio-item { 
-            display: flex; 
-            justify-content: space-between; 
-        }
-        .ratio-item span:first-child { 
-            font-size: 13px; 
-            color: var(--text-secondary); 
-        }
-        .ratio-item span:last-child { 
-            font-size: 13px; 
-            font-weight: 600; 
-        }
-        .large-card { 
-            padding: 0; 
-        } 
-        #chart-card-1 { grid-area: chart1; } 
-        #chart-card-2 { grid-area: chart2; }
-        .chart-container { 
-            padding: 24px; 
-            height: 400px; 
-            position: relative; 
-            z-index: 2; 
-        }
-        .upload-area, .login-area { 
-            grid-column: 1 / -1; 
-            padding: 48px; 
-            border: 3px dashed var(--border-color); 
-            border-radius: 16px; 
-            text-align: center; 
-            transition: all 0.4s ease; 
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%); 
-        }
-        .upload-area.hidden, .login-area.hidden { 
-            display: none; 
-        }
-        .upload-area:hover, .login-area:hover { 
-            border-color: var(--dsm-blue); 
-            transform: translateY(-4px); 
-            box-shadow: 0 12px 24px rgba(31, 71, 136, 0.15); 
-        }
-        .upload-area.active { 
-            border-color: var(--dsm-green); 
-            box-shadow: 0 0 32px rgba(76, 175, 80, 0.2); 
-        }
-        .upload-icon { 
-            font-size: 56px; 
-            margin-bottom: 24px; 
-            color: var(--dsm-blue); 
-            display: block; 
-        }
-        .upload-text, .login-text { 
-            font-size: 18px; 
-            font-weight: 600; 
-            color: var(--text-primary); 
-            margin-bottom: 8px; 
-        }
-        .upload-subtext { 
-            font-size: 14px; 
-            color: var(--text-muted); 
-        }
-        .upload-highlight { 
-            color: var(--dsm-blue); 
-            font-weight: 700; 
-        }
-        .publish-container { 
-            text-align: center; 
-            margin-top: 24px; 
-        }
-        .publish-btn { 
-            background: var(--gradient-dsm); 
-            color: white; 
-            font-size: 16px; 
-            font-weight: 700; 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-        }
-        .publish-btn:hover { 
-            transform: scale(1.05); 
-            box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3); 
-        }
-        .publish-btn:disabled { 
-            background: var(--border-color); 
-            cursor: not-allowed; 
-        }
-        .status-message { 
-            margin-top: 16px; 
-            font-size: 14px; 
-            font-weight: 500; 
-        }
-        .status-message.success { 
-            color: var(--accent-green); 
-        }
-        .status-message.error { 
-            color: var(--accent-red); 
-        }
-        .login-form { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            max-width: 400px; 
-            margin: 24px auto 0; 
-        }
-        .login-input { 
-            background: var(--bg-secondary); 
-            border: 1px solid var(--border-color); 
-            color: var(--text-primary); 
-            padding: 12px; 
-            border-radius: 8px; 
-            font-size: 14px; 
-        }
-        .login-btn { 
-            background: var(--accent-blue); 
-            color: white; 
-            font-size: 16px; 
-            font-weight: 600; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-        }
-        @media (max-width: 1600px) { .header-stats { gap: 12px; } }
-        @media (max-width: 1200px) { .dashboard { grid-template-columns: 1fr 1fr; grid-template-areas: "header header" "kpi1 kpi2" "kpi3 sidebar" "chart1 chart1" "chart2 chart2"; } .header-content { flex-direction: column; gap: 24px; } }
-        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; grid-template-areas: "header" "kpi1" "kpi2" "kpi3" "sidebar" "chart1" "chart2"; padding: 16px; gap: 16px; } .header-left { flex-direction: column; text-align: center; } .header-stats { width: 100%; justify-content: center; } .filters, .date-filter-container { justify-content: center; width: 100%; } }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSM Torre de Controle - Dashboard de Vendas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        :root { 
+            --dsm-blue: #1f4788; 
+            --dsm-green: #4caf50; 
+            --bg-primary: #0f1419; 
+            --bg-secondary: #1a202c; 
+            --bg-card: #2d3748; 
+            --bg-card-hover: #374151; 
+            --border-color: #4a5568; 
+            --text-primary: #ffffff; 
+            --text-secondary: #cbd5e0; 
+            --text-muted: #a0aec0; 
+            --accent-blue: #3b82f6; 
+            --accent-teal: #14b8a6; 
+            --accent-orange: #f59e0b; 
+            --accent-green: #10b981; 
+            --accent-red: #ef4444; 
+            --gradient-dsm: linear-gradient(135deg, var(--dsm-blue) 0%, var(--dsm-green) 100%); 
+            --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+            --gradient-teal: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); 
+            --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2); 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg-primary); 
+            color: var(--text-primary); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            line-height: 1.6; 
+            font-size: 14px; 
+            overflow-x: auto; 
+        }
+        .dashboard { 
+            padding: 24px; 
+            max-width: 1920px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 320px 1fr 1fr 1fr; 
+            grid-template-rows: auto auto 1fr; 
+            gap: 24px; 
+            min-height: 100vh; 
+            grid-template-areas: 
+                "header header header header" 
+                "sidebar kpi1 kpi2 kpi3" 
+                "sidebar chart1 chart1 chart2"; 
+        }
+        .header { 
+            grid-area: header; 
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); 
+            border-radius: 16px; 
+            padding: 24px 32px; /* Ajuste no padding para a nova logo */
+            border: 2px solid var(--border-color); 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: var(--shadow-lg); 
+        }
+        .header::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 6px; 
+            background: var(--gradient-dsm); 
+        }
+        .header-content { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: relative; 
+            z-index: 2; 
+        }
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            gap: 24px; 
+        }
+        .dsm-logo img { 
+            height: 45px; /* Altura ajustada para a nova logo */
+            width: auto;
+        }
+        .header-info h1 { 
+            font-size: 28px; /* Tamanho ajustado para o novo título */
+            font-weight: 700; 
+            margin: 0; /* Removida margem para melhor alinhamento */
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .header-info p { 
+            display: none; /* Escondendo o subtítulo antigo */
+        }
+        .header-stats { 
+            display: flex; 
+            gap: 16px; 
+            align-items: center; 
+            flex-wrap: wrap;
+        }
+        .period-badge { 
+            background: var(--gradient-dsm); 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            color: white; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .filters { 
+            display: flex; 
+            gap: 12px; 
+            background: var(--bg-secondary); 
+            padding: 8px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+            flex-wrap: wrap;
+        }
+        .filter-btn { 
+            padding: 12px 20px; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-secondary); 
+            border-radius: 8px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .filter-btn:hover { 
+            background: var(--bg-card-hover); 
+            color: var(--text-primary); 
+            transform: translateY(-1px); 
+        }
+        .filter-btn.active { 
+            background: var(--gradient-dsm); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3); 
+        }
+        .date-filter-container {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .date-input {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            color-scheme: dark;
+        }
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+        }
+        .date-input:focus {
+            border-color: var(--dsm-blue);
+            box-shadow: 0 0 0 2px rgba(31, 71, 136, 0.3);
+        }
+        .date-separator {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .apply-date-btn {
+            background: var(--gradient-dsm);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .apply-date-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31, 71, 136, 0.3);
+        }
+        .clear-date-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .clear-date-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+        .card { 
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); 
+            border-radius: 16px; 
+            border: 1px solid var(--border-color); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .card:hover { 
+            transform: translateY(-8px); 
+            border-color: var(--dsm-blue); 
+            box-shadow: 0 20px 40px rgba(31, 71, 136, 0.2); 
+        }
+        .card-header { 
+            padding: 24px 24px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: relative; 
+            z-index: 2; 
+        }
+        .card-title { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        .card-icon { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 18px; 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+        }
+        .kpi-card { grid-area: kpi1; } 
+        #kpi-card-2 { grid-area: kpi2; } 
+        #kpi-card-3 { grid-area: kpi3; }
+        .kpi-content { 
+            padding: 32px 24px; 
+            text-align: center; 
+            position: relative; 
+            z-index: 2; 
+        }
+        .kpi-value { 
+            font-size: 36px; 
+            font-weight: 900; 
+            margin-bottom: 12px; 
+            background: var(--gradient-teal); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-family: 'Inter', monospace; 
+            letter-spacing: -1px; 
+        }
+        .kpi-value.orange { 
+            background: var(--gradient-orange); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .kpi-value.blue { 
+            background: var(--gradient-blue); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .kpi-subtitle { 
+            font-size: 13px; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        .sidebar-card { 
+            grid-area: sidebar; 
+            padding: 0; 
+        }
+        .vendor-list { 
+            padding: 24px; 
+        }
+        .vendor-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px; 
+            background: var(--bg-secondary); 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            border: 1px solid var(--border-color); 
+            transition: all 0.3s ease; 
+        }
+        .vendor-item:hover { 
+            background: var(--bg-card-hover); 
+            transform: translateX(4px); 
+        }
+        .vendor-info { 
+            display: flex; 
+            align-items: center;
+            min-width: 0; 
+        }
+        .vendor-name { 
+            font-weight: 600; 
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vendor-value { 
+            font-weight: 700; 
+            font-size: 15px; 
+            color: var(--accent-teal);
+            flex-shrink: 0;
+            margin-left: 16px;
+        }
+        .vendor-rank { 
+            width: 28px; 
+            height: 28px; 
+            background: var(--gradient-dsm); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: white; 
+            margin-right: 12px; 
+            flex-shrink: 0; 
+        }
+        .performance-ratio { 
+            margin: 0 24px 24px 24px; 
+            padding: 20px; 
+            background: var(--bg-secondary); 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+        }
+        .ratio-item { 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        .ratio-item span:first-child { 
+            font-size: 13px; 
+            color: var(--text-secondary); 
+        }
+        .ratio-item span:last-child { 
+            font-size: 13px; 
+            font-weight: 600; 
+        }
+        .large-card { 
+            padding: 0; 
+        } 
+        #chart-card-1 { grid-area: chart1; } 
+        #chart-card-2 { grid-area: chart2; }
+        .chart-container { 
+            padding: 24px; 
+            height: 400px; 
+            position: relative; 
+            z-index: 2; 
+        }
+        .upload-area, .login-area { 
+            grid-column: 1 / -1; 
+            padding: 48px; 
+            border: 3px dashed var(--border-color); 
+            border-radius: 16px; 
+            text-align: center; 
+            transition: all 0.4s ease; 
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%); 
+        }
+        .upload-area.hidden, .login-area.hidden { 
+            display: none; 
+        }
+        .upload-area:hover, .login-area:hover { 
+            border-color: var(--dsm-blue); 
+            transform: translateY(-4px); 
+            box-shadow: 0 12px 24px rgba(31, 71, 136, 0.15); 
+        }
+        .upload-area.active { 
+            border-color: var(--dsm-green); 
+            box-shadow: 0 0 32px rgba(76, 175, 80, 0.2); 
+        }
+        .upload-icon { 
+            font-size: 56px; 
+            margin-bottom: 24px; 
+            color: var(--dsm-blue); 
+            display: block; 
+        }
+        .upload-text, .login-text { 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            margin-bottom: 8px; 
+        }
+        .upload-subtext { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+        }
+        .upload-highlight { 
+            color: var(--dsm-blue); 
+            font-weight: 700; 
+        }
+        .publish-container { 
+            text-align: center; 
+            margin-top: 24px; 
+        }
+        .publish-btn { 
+            background: var(--gradient-dsm); 
+            color: white; 
+            font-size: 16px; 
+            font-weight: 700; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
+        .publish-btn:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3); 
+        }
+        .publish-btn:disabled { 
+            background: var(--border-color); 
+            cursor: not-allowed; 
+        }
+        .status-message { 
+            margin-top: 16px; 
+            font-size: 14px; 
+            font-weight: 500; 
+        }
+        .status-message.success { 
+            color: var(--accent-green); 
+        }
+        .status-message.error { 
+            color: var(--accent-red); 
+        }
+        .login-form { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            max-width: 400px; 
+            margin: 24px auto 0; 
+        }
+        .login-input { 
+            background: var(--bg-secondary); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-primary); 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 14px; 
+        }
+        .login-btn { 
+            background: var(--accent-blue); 
+            color: white; 
+            font-size: 16px; 
+            font-weight: 600; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+        }
+        @media (max-width: 1600px) { .header-stats { gap: 12px; } }
+        @media (max-width: 1200px) { .dashboard { grid-template-columns: 1fr 1fr; grid-template-areas: "header header" "kpi1 kpi2" "kpi3 sidebar" "chart1 chart1" "chart2 chart2"; } .header-content { flex-direction: column; gap: 24px; } }
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; grid-template-areas: "header" "kpi1" "kpi2" "kpi3" "sidebar" "chart1" "chart2"; padding: 16px; gap: 16px; } .header-left { flex-direction: column; text-align: center; } .header-stats { width: 100%; justify-content: center; } .filters, .date-filter-container { justify-content: center; width: 100%; } }
+    </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="dsm-logo">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACACAYAAAC6yG3+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAErYSURBVHhe7Z0HgB1FlccrD0NKQiAhEIIg5CJIQBEFFkU2xY6sIAgiIEgREVGQyI4giL5LIIsBIiQIeSdNQkICEjLJ7n/X9L1uN7N7s2+2u3v36f18l6pnd2Z6eqp6p6p7qt4kGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGInsert base64 encoded image here" alt="DSM Logo">
-ar-imagem-base64.png
-    
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="dsm-logo">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACACAYAAAC6yG3+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAErYSURBVHhe7Z0HgB1FlccrD0NKQiAhEIIg5CJIQBEFFkU2xY6sIAgiIEgREVGQyI4giL4ioiDIvggiiL5LIIsBIiQIeSdNQkICEjLJ7n/X9L1uN7N7s2+2u3v36f18l6pnd2Z6eqp6p6p7qt4kGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhGIZhG-Ei0K8eK+7wKkGAAAAAAAAAAAAwA=" alt="Logo DSM">
                     </div>
-    
-  
                     <div class="header-info">
-      
-                        <h1>DSM - Torre de Controle</h1>
-          
-                        <p style="display: none;"></p>
-                    </div>
+                        <h1>DSM - Dash Comercial</h1>
+                        <p style="display: none;"></p> </div>
                 </div>
                 <div class="header-stats">
                     <div id="period-badge" class="period-badge">Sem Dados</div>
-        
                     <div class="filters" style="display: none;">
                         <button class="filter-btn active" data-filter="all">Tudo</button>
                         <button class="filter-btn" data-filter="30">30d</button>
                         <button class="filter-btn" data-filter="7">7d</button>
                         <button class="filter-btn" data-filter="1">Hoje</button>
                     </div>
-  
                     <div class="date-filter-container" style="display: none;">
                         <input type="date" id="start-date" class="date-input" title="Data inicial">
                         <span class="date-separator">até</span>
@@ -541,7 +532,7 @@ ar-imagem-base64.png
                 <div class="status-message" id="status-message"></div>
             </div>
         </div>
-        
+        
         <div class="card kpi-card" id="kpi-card-1" style="display: none;">
             <div class="card-header">
                 <span class="card-title">Vendas Totais</span>
@@ -552,7 +543,7 @@ ar-imagem-base64.png
                 <div class="kpi-subtitle">Período Selecionado</div>
             </div>
         </div>
-        
+        
         <div class="card kpi-card" id="kpi-card-2" style="display: none;">
             <div class="card-header">
                 <span class="card-title">Ticket Médio</span>
@@ -563,9 +554,9 @@ ar-imagem-base64.png
                 <div class="kpi-subtitle">Por Transação</div>
             </div>
         </div>
-        
+        
         <div class="card kpi-card" id="kpi-card-3" style="display: none;">
-A           <div class="card-header">
+            <div class="card-header">
                 <span class="card-title">Total Vendas</span>
                 <div class="card-icon" style="background: var(--gradient-blue);">📈</div>
             </div>
@@ -574,25 +565,24 @@ A           <div class="card-header">
                 <div class="kpi-subtitle">Transações</div>
             </div>
         </div>
-        
+        
         <div class="card sidebar-card" id="sidebar-card" style="display: none;">
             <div class="card-header">
                 <span class="card-title">Top Vendedores</span>
                 <div class="card-icon" style="background: var(--gradient-dsm);">👑</div>
             </div>
             <div class="vendor-list" id="vendor-list"></div>
-  D         <div class="performance-ratio" id="performance-ratio"></div>
+            <div class="performance-ratio" id="performance-ratio"></div>
         </div>
-        
+        
         <div class="card large-card" id="chart-card-1" style="display: none;">
             <div class="card-header">
                 <span class="card-title" id="chart-evolucao-title">Evolução de Vendas</span>
                 <div class="card-icon" style="background: var(--gradient-blue);">📈</div>
             </div>
             <div class="chart-container" id="chart-evolucao"></div>
-Note que a data está puxando ainda do mês passado mesmo não contendo dados do mês passado, e quando eu clico em hoje não piuxa nada
         </div>
-        
+        
         <div class="card large-card" id="chart-card-2" style="display: none;">
             <div class="card-header">
                 <span class="card-title">Top 10 Clientes</span>
@@ -607,7 +597,7 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    
+    
     <script>
         // --- INÍCIO DA SEÇÃO DE CONFIGURAÇÃO ---
         const firebaseConfig = {
@@ -622,10 +612,10 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        
-        let originalData = null; 
-        let processedDataForPublish = null; 
-        let customDateFilter = null; 
+        
+        let originalData = null; 
+        let processedDataForPublish = null; 
+        let customDateFilter = null; 
 
         // --- LÓGICA PRINCIPAL DE ROTEAMENTO ---
         document.addEventListener('DOMContentLoaded', function() {
@@ -671,16 +661,15 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
 
                 if (doc.exists) {
                     const data = doc.data();
-                    // Garante que 'Data' seja um objeto Date, crucial para filtros
                     originalData = data.allRows.map(r => ({ ...r, Data: new Date(r.Data) }));
-                    
+                    
                     document.querySelectorAll('.kpi-card, .sidebar-card, .large-card').forEach(el => el.style.display = 'block');
                     document.querySelector('.filters').style.display = 'flex';
                     document.querySelector('.date-filter-container').style.display = 'flex';
 
                     setupFilters();
                     setupDateFilter();
-                    
+                    
                     document.querySelector('.filter-btn.active')?.classList.remove('active');
                     document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
                     applyFilter('all');
@@ -690,7 +679,7 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
             } catch (error) {
                 console.error("Erro ao buscar dados: ", error);
                 periodBadge.textContent = "Erro ao Carregar";
-  T         }
+            }
         }
 
         // --- FUNÇÕES DE AUTENTICAÇÃO E ADMIN ---
@@ -699,7 +688,7 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const statusMessage = document.getElementById('login-status-message');
-            
+            
             statusMessage.textContent = 'Autenticando...';
             statusMessage.className = 'status-message';
 
@@ -708,7 +697,6 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
                 statusMessage.textContent = '';
             } catch (error) {
                 statusMessage.textContent = `Erro: ${error.message}`;
-code-block
                 statusMessage.className = 'status-message error';
             }
         }
@@ -717,7 +705,7 @@ code-block
             const uploadArea = document.getElementById('upload-area');
             const fileInput = document.getElementById('csv-file');
             document.getElementById('publish-btn').addEventListener('click', publishDataToFirebase);
-            
+            
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => uploadArea.addEventListener(e, p => { p.preventDefault(); p.stopPropagation(); }));
             ['dragenter', 'dragover'].forEach(e => uploadArea.addEventListener(e, () => uploadArea.classList.add('active')));
             ['dragleave', 'drop'].forEach(e => uploadArea.addEventListener(e, () => uploadArea.classList.remove('active')));
@@ -730,7 +718,6 @@ code-block
             if (files.length > 0) {
                 Papa.parse(files[0], {
                     header: true, skipEmptyLines: true, delimiter: ";",
-Note que a data está puxando ainda do mês passado mesmo não contendo dados do mês passado, e quando eu clico em hoje não piuxa nada
                     encoding: "UTF-8",
                     complete: results => processDataForPublishing(results.data),
                     error: error => alert(`Erro no CSV: ${error.message}`)
@@ -739,26 +726,25 @@ Note que a data está puxando ainda do mês passado mesmo não contendo dados do
         }
 
         function processDataForPublishing(data) {
-source_code
             const statusMessage = document.getElementById('status-message');
             try {
                 const allRows = data.map(row => {
                     const valorStr = String(row.Valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.');
-                Vou     const valor = parseFloat(valorStr);
+                    const valor = parseFloat(valorStr);
                     if (isNaN(valor) || !row.Data || !row.Vendedor || !row.Cliente) return null;
                     const [day, month, year] = row.Data.split('/');
                     return {
                         Vendedor: row.Vendedor.trim(),
-Não                   Cliente: row.Cliente.trim(),
-                        Data: new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString(), // Armazena como string ISO UTC
+                        Cliente: row.Cliente.trim(),
+                        Data: new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString(),
                         Valor: valor
-              sugiro   };
+                    };
                 }).filter(Boolean);
 
-Two             processedDataForPublish = { allRows, timestamp: new Date().toISOString() };
+                processedDataForPublish = { allRows, timestamp: new Date().toISOString() };
                 document.getElementById('publish-container').style.display = 'block';
                 document.getElementById('publish-btn').disabled = false;
-Example             statusMessage.textContent = `${allRows.length} registros prontos para publicar.`;
+                statusMessage.textContent = `${allRows.length} registros prontos para publicar.`;
                 statusMessage.className = 'status-message';
             } catch (error) {
                 statusMessage.textContent = `Erro ao processar arquivo: ${error.message}`;
@@ -770,13 +756,13 @@ Example             statusMessage.textContent = `${allRows.length} registr
             if (!processedDataForPublish) return;
             const publishBtn = document.getElementById('publish-btn');
             const statusMessage = document.getElementById('status-message');
-            
+            
             publishBtn.disabled = true;
             publishBtn.textContent = 'Publicando...';
             statusMessage.className = 'status-message';
             statusMessage.textContent = 'Enviando dados...';
 
-colocar           try {
+            try {
                 await db.collection('dashboard').doc('dados').set(processedDataForPublish);
                 statusMessage.textContent = 'Sucesso! Dados publicados.';
                 statusMessage.className = 'status-message success';
@@ -786,182 +772,192 @@ colocar           try {
                 statusMessage.textContent = `Erro ao publicar: ${error.message}`;
                 statusMessage.className = 'status-message error';
                 publishBtn.textContent = 'Tentar Publicar Novamente';
-Two           } finally {
+            } finally {
                 publishBtn.disabled = false;
             }
         }
 
-        // --- FUNÇÕES DE FILTROS (CORRIGIDAS) ---
-        function setupFilters() {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (!originalData) return;
-                    
-                    customDateFilter = null;
-                    document.getElementById('start-date').value = '';
-                    document.getElementById('end-date').value = '';
-                    
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    applyFilter(this.dataset.filter);
-                });
-            });
-        }
+      // --- FUNÇÕES DE FILTROS (CORRIGIDAS) ---
+        function setupFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!originalData) return;
+                    
+                    customDateFilter = null;
+                    document.getElementById('start-date').value = '';
+                    document.getElementById('end-date').value = '';
+                    
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilter(this.dataset.filter);
+                });
+            });
+        }
 
-    	function setupDateFilter() {
-            const startDateInput = document.getElementById('start-date');
-            const endDateInput = document.getElementById('end-date');
-            const applyBtn = document.getElementById('apply-date-btn');
-            const clearBtn = document.getElementById('clear-date-btn');
+        function setupDateFilter() {
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            const applyBtn = document.getElementById('apply-date-btn');
+            const clearBtn = document.getElementById('clear-date-btn');
 
-            applyBtn.addEventListener('click', function() {
-                const startDateStr = startDateInput.value; // Formato "YYYY-MM-DD"
-                const endDateStr = endDateInput.value;   // Formato "YYYY-MM-DD"
-                
-                if (!startDateStr || !endDateStr) {
-                    alert('Por favor, selecione ambas as datas.');
-                    return;
-                }
+            applyBtn.addEventListener('click', function() {
+                const startDateStr = startDateInput.value; // Formato "YYYY-MM-DD"
+                const endDateStr = endDateInput.value;   // Formato "YYYY-MM-DD"
+                
+                if (!startDateStr || !endDateStr) {
+                    alert('Por favor, selecione ambas as datas.');
+                    return;
+                }
 
                 // Cria datas como UTC 00:00:00 do dia selecionado
-                const startDate = new Date(startDateStr + 'T00:00:00Z'); 
+                const startDate = new Date(startDateStr + 'T00:00:00Z'); 
                 // Cria datas como UTC 23:59:59 do dia selecionado para incluir o dia final inteiro
-Não                 const endDate = new Date(endDateStr + 'T23:59:59Z'); 
+                const endDate = new Date(endDateStr + 'T23:59:59Z'); 
 
-                if (startDate > endDate) {
-      Example           alert('A data inicial deve ser anterior ou igual à data final.');
-                    return;
-                }
-                
-                customDateFilter = {
-                    start: startDate,
-                    end: endDate
-                };
-                
-section               document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                
-                applyCustomDateFilter();
-            });
+                if (startDate > endDate) {
+                    alert('A data inicial deve ser anterior ou igual à data final.');
+                    return;
+                }
+                
+                customDateFilter = {
+                    start: startDate,
+                    end: endDate
+                };
+                
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                
+                applyCustomDateFilter();
+            });
 
-            clearBtn.addEventListener('click', function() {
-Of               startDateInput.value = '';
-                endDateInput.value = '';
-              Example   customDateFilter = null;
-                
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-Ah,               document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
-                applyFilter('all');
-            });
-        }
+            clearBtn.addEventListener('click', function() {
+                startDateInput.value = '';
+                endDateInput.value = '';
+                customDateFilter = null;
+                
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+                applyFilter('all');
+            });
+        }
 
-        function applyFilter(days) {
-            let filteredData;
-            const periodBadge = document.getElementById('period-badge');
+        function applyFilter(days) {
+            let filteredData;
+            const periodBadge = document.getElementById('period-badge');
             const now = new Date(); // Data/hora local atual
 
             // Obter o início do dia de "hoje" em UTC
             // Isso cria uma data em UTC (ex: 27/10/2025 00:00:00 UTC)
             const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-            if (days === 'all') {
-                filteredData = originalData;
-                periodBadge.textContent = "Período Completo";
-sugiro         } else {
+            if (days === 'all') {
+                filteredData = originalData;
+                // O texto do badge será atualizado em updateDashboardUI
+            } else {
                 let startDateUTC;
                 
                 // O fim do período é o início de amanhã em UTC (exclusive)
                 const endDateUTC = new Date(todayUTC);
                 endDateUTC.setUTCDate(endDateUTC.getUTCDate() + 1);
 
-                if (days === '1') { // Hoje
+                if (days === '1') { // Hoje
                     startDateUTC = todayUTC; // Início de hoje UTC
-                    periodBadge.textContent = now.toLocaleDateString('pt-BR'); // Mostra a data local
-de             } else { // 7d ou 30d
+                } else { // 7d ou 30d
                     startDateUTC = new Date(todayUTC);
                     // Define o início do período N dias atrás (em UTC)
-                    startDateUTC.setUTCDate(todayUTC.getUTCDate() - parseInt(days) + 1);
-                    
-                    // Para exibir o período, usamos as datas locais
-                    const startLocalDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(days) + 1);
-                    const endLocalDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    periodBadge.textContent = `${startLocalDate.toLocaleDateString('pt-BR')} - ${endLocalDate.toLocaleDateString('pt-BR')}`;
-                }
+                    startDateUTC.setUTCDate(todayUTC.getUTCDate() - parseInt(days) + 1);
+                }
 
                 filteredData = originalData.filter(row => {
                     // row.Data já é um objeto Date (convertido do ISO string UTC ao carregar)
                     return row.Data >= startDateUTC && row.Data < endDateUTC;
                 });
-            }
-    Example       updateDashboardUI(filteredData);
-        }
+            }
+            updateDashboardUI(filteredData);
+        }
 
-        function applyCustomDateFilter() {
-            if (!customDateFilter || !originalData) return;
-            
-            const filteredData = originalData.filter(row => {
+        function applyCustomDateFilter() {
+            if (!customDateFilter || !originalData) return;
+            
+            const filteredData = originalData.filter(row => {
                 // Compara os objetos Date diretamente. 
                 // row.Data é o Date object (UTC 00:00:00)
                 // customDateFilter.start é (UTC 00:00:00)
                 // customDateFilter.end é (UTC 23:59:59)
-                return row.Data >= customDateFilter.start && row.Data <= customDateFilter.end;
-  B           });
-            
+                return row.Data >= customDateFilter.start && row.Data <= customDateFilter.end;
+            });
+            
             // Atualiza o badge com o período selecionado
             const periodBadge = document.getElementById('period-badge');
             const startStr = customDateFilter.start.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const endStr = customDateFilter.end.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             periodBadge.textContent = `${startStr} - ${endStr}`;
 
-            updateDashboardUI(filteredData);
-        }
+            updateDashboardUI(filteredData);
+        }
 
-        // --- FUNÇÕES DE RENDERIZAÇÃO ---
-        function updateDashboardUI(data) {
-            const periodBadge = document.getElementById('period-badge');
-Por           if (data && data.length > 0) {
+        // --- FUNÇÕES DE RENDERIZAÇÃO ---
+        function updateDashboardUI(data) {
+            const periodBadge = document.getElementById('period-badge');
+            if (data && data.length > 0) {
                 // Atualiza o badge APENAS se não for um filtro customizado (que já foi setado)
                 if (!customDateFilter) {
-                    const dates = data.map(r => r.Data);
-                    const firstDate = new Date(Math.min.apply(null, dates));
-                    const lastDate = new Date(Math.max.apply(null, dates));
+                    const dates = data.map(r => r.Data);
+                    const firstDate = new Date(Math.min.apply(null, dates));
+                    const lastDate = new Date(Math.max.apply(null, dates));
                     
-                    const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                    const activeFilterBtn = document.querySelector('.filter-btn.active');
+                    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+
                     if (activeFilter === 'all') {
                         periodBadge.textContent = `${firstDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })} - ${lastDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`;
                     } else if (activeFilter === '1') {
                          periodBadge.textContent = `${lastDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`;
-                    } else {
-                        periodBadge.textContent = `${firstDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })} - ${lastDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`;
+                    } else { // 7d ou 30d
+                        const now = new Date();
+                        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                        const endDate = new Date(today);
+                        const startDate = new Date(today);
+                        startDate.setUTCDate(today.getUTCDate() - parseInt(activeFilter) + 1);
+
+                        periodBadge.textContent = `${startDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })} - ${endDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`;
                     }
                 }
-            } else {
-            // Se não houver dados, verifica qual filtro está ativo
-            if (customDateFilter) {
-                const startStr = customDateFilter.start.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                const endStr = customDateFilter.end.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                periodBadge.textContent = `${startStr} - ${endStr}`;
             } else {
-                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-                if (activeFilter === '1') {
-                    periodBadge.textContent = new Date().toLocaleDateString('pt-BR');
-                } else if (activeFilter !== 'all') {
-                    // Mantém o badge dos filtros 7d e 30d mesmo sem dados
-                    // A lógica para isso já está no applyFilter
+                // Se não houver dados, verifica qual filtro está ativo
+                if (customDateFilter) {
+                    // O badge já foi setado em applyCustomDateFilter, mas podemos confirmar
+                    const startStr = customDateFilter.start.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    const endStr = customDateFilter.end.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    periodBadge.textContent = `${startStr} - ${endStr}`;
                 } else {
-                    periodBadge.textContent = "Sem Dados no Período";
+                    const activeFilterBtn = document.querySelector('.filter-btn.active');
+                    const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
+
+                    if (activeFilter === '1') {
+                        const now = new Date();
+                        periodBadge.textContent = now.toLocaleDateString('pt-BR'); // Mostra a data de hoje local
+                    } else if (activeFilter === '7' || activeFilter === '30') {
+                        const now = new Date();
+                        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+                        const endDate = new Date(today);
+                        const startDate = new Date(today);
+                        startDate.setUTCDate(today.getUTCDate() - parseInt(activeFilter) + 1);
+                         periodBadge.textContent = `${startDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })} - ${endDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`;
+                    } else {
+                        periodBadge.textContent = "Sem Dados no Período";
+                    }
                 }
             }
-            }
-            updateKPIs(data);
-            updateSidebar(data);
-            renderEvolucaoChart(data);
-sugiro             renderClientesChart(data);
-        }
+            updateKPIs(data);
+            updateSidebar(data);
+            renderEvolucaoChart(data);
+            renderClientesChart(data);
+        }
 
         function formatCurrency(value) {
             return (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
-        
+        
         function updateKPIs(data) {
             const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
             const numVendas = data.length;
@@ -969,7 +965,7 @@ sugiro             renderClientesChart(data);
             document.getElementById('kpi-total').textContent = formatCurrency(totalVendas);
             document.getElementById('kpi-count').textContent = numVendas.toLocaleString('pt-BR');
             document.getElementById('kpi-ticket').textContent = formatCurrency(ticketMedio);
-      t   }
+        }
 
         function updateSidebar(data) {
             const totalVendas = data.reduce((sum, row) => sum + row.Valor, 0);
@@ -985,14 +981,14 @@ sugiro             renderClientesChart(data);
                 ratioContainer.innerHTML = '';
             } else {
                 const vendorListHTML = sortedVendedores.map(([name, value], index) => {
-sugiro                     return `
+                    return `
                         <div class="vendor-item">
                             <div class="vendor-info">
                                 <div class="vendor-rank">${index + 1}</div>
                                 <div class="vendor-name">${name}</div>
                             </div>
                             <div class="vendor-value">${formatCurrency(value)}</div>
-section                   </div>
+                        </div>
                     `;
                 }).join('');
                 vendorList.innerHTML = vendorListHTML;
@@ -1000,62 +996,60 @@ section                   </div>
                 const ratioItemsHTML = sortedVendedores.map(([name, value], index) => {
                     const percentage = totalVendas > 0 ? (value / totalVendas) * 100 : 0;
                     const color = index === 0 ? 'var(--accent-teal)' : 'var(--accent-blue)';
-  A                   return `
+                    return `
                         <div class="ratio-item" style="margin-bottom: 8px;">
                             <span>${name.split(' ')[0]}</span>
                             <span style="font-weight: 600; color: ${color};">${percentage.toFixed(1)}%</span>
-Note que a data está puxando ainda do mês passado mesmo não contendo dados do mês passado, e quando eu clico em hoje não piuxa nada
                         </div>
                     `;
                 }).join('');
-sugiro               ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
+                ratioContainer.innerHTML = ratioHeaderHTML + ratioItemsHTML;
             }
         }
 
         function renderEvolucaoChart(data) {
             const salesByDate = data.reduce((acc, row) => {
                 const dateString = row.Data.toISOString().split('T')[0];
-                acc[dateString] = (acc[dateString] || 0) + row.Valor; 
+                acc[dateString] = (acc[dateString] || 0) + row.Valor; 
                 return acc;
             }, {});
             const sortedDates = Object.entries(salesByDate).sort((a,b) => new Date(a[0]) - new Date(b[0]));
-Additional-instructions:             Highcharts.chart('chart-evolucao', { 
-                chart: { type: 'areaspline' }, title: { text: null }, 
-                xAxis: { categories: sortedDates.map(d => new Date(d[0]+"T00:00:00Z").toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'short' })) }, 
-                yAxis: { title: { text: null }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
-sugiro               legend: { enabled: false }, 
-                plotOptions: { areaspline: { fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [ [0, 'rgba(20, 184, 166, 0.8)'], [1, 'rgba(20, 184, 166, 0.1)'] ] }, lineColor: '#14b8a6', lineWidth: 3, marker: { fillColor: '#14b8a6', lineColor: '#ffffff', lineWidth: 2, radius: 5 } } }, 
-                series: [{ name: 'Vendas', data: sortedDates.map(d => d[1]) }], 
+            Highcharts.chart('chart-evolucao', { 
+                chart: { type: 'areaspline' }, title: { text: null }, 
+                xAxis: { categories: sortedDates.map(d => new Date(d[0]+"T00:00:00Z").toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'short' })) }, 
+                yAxis: { title: { text: null }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                plotOptions: { areaspline: { fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [ [0, 'rgba(20, 184, 166, 0.8)'], [1, 'rgba(20, 184, 166, 0.1)'] ] }, lineColor: '#14b8a6', lineWidth: 3, marker: { fillColor: '#14b8a6', lineColor: '#ffffff', lineWidth: 2, radius: 5 } } }, 
+                series: [{ name: 'Vendas', data: sortedDates.map(d => d[1]) }], 
                 tooltip: { formatter: function() { return `<b>${this.x}</b><br>Vendas: ${formatCurrency(this.y)}`; } }
             });
         }
 
         function renderClientesChart(data) {
             const salesByCliente = data.reduce((acc, row) => {
-custom-instructions: 
-                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor; 
-A               return acc;
+                acc[row.Cliente] = (acc[row.Cliente] || 0) + row.Valor; 
+                return acc;
             }, {});
             const sortedClientes = Object.entries(salesByCliente).sort(([,a],[,b]) => b-a).slice(0, 10);
-            Highcharts.chart('chart-clientes', { 
-                chart: { type: 'bar' }, title: { text: null }, 
-                xAxis: { categories: sortedClientes.map(c => c[0]), labels: { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } }, 
-                yAxis: { title: { enabled: false }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
-                legend: { enabled: false }, 
-                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }], 
+            Highcharts.chart('chart-clientes', { 
+                chart: { type: 'bar' }, title: { text: null }, 
+                xAxis: { categories: sortedClientes.map(c => c[0]), labels: { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } } }, 
+                yAxis: { title: { enabled: false }, labels: { formatter: function() { return 'R$ ' + (this.value / 1000).toFixed(0) + 'k'; } } }, 
+                legend: { enabled: false }, 
+                series: [{ name: 'Total Comprado', data: sortedClientes.map(c => c[1]), color: 'var(--accent-blue)' }], 
                 tooltip: { formatter: function() { return `<b>${this.x}</b><br>Total: ${formatCurrency(this.y)}`; } }
             });
         }
-        
+        
         function setupHighchartsTheme() {
-            Highcharts.setOptions({ 
-                chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } }, 
-Example               title: { style: { color: 'var(--text-primary)' } }, 
-                xAxis: { labels: { style: { color: 'var(--text-secondary)' } }, lineColor: 'var(--border-color)', tickColor: 'var(--border-color)' }, 
-                yAxis: { title: { style: { color: 'var(--text-secondary)' } }, labels: { style: { color: 'var(--text-secondary)' } }, gridLineColor: 'var(--border-color)' }, 
-                legend: { itemStyle: { color: 'var(--text-primary)' } }, 
-                tooltip: { backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', style: { color: 'var(--text-primary)' } }, 
-                credits: { enabled: false } 
+            Highcharts.setOptions({ 
+                chart: { backgroundColor: 'transparent', style: { fontFamily: 'Inter' } }, 
+                title: { style: { color: 'var(--text-primary)' } }, 
+                xAxis: { labels: { style: { color: 'var(--text-secondary)' } }, lineColor: 'var(--border-color)', tickColor: 'var(--border-color)' }, 
+                yAxis: { title: { style: { color: 'var(--text-secondary)' } }, labels: { style: { color: 'var(--text-secondary)' } }, gridLineColor: 'var(--border-color)' }, 
+                legend: { itemStyle: { color: 'var(--text-primary)' } }, 
+                tooltip: { backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', style: { color: 'var(--text-primary)' } }, 
+                credits: { enabled: false } 
             });
         }
     </script>
